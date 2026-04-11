@@ -130,13 +130,23 @@
             font-size: 12px;
             color: #bbb;
             min-height: 34px;
-            font-family: monospace;
-            line-height: 1.8;
-            word-break: break-word;
+            max-height: 260px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
+        .move-log .empty-log { font-family: monospace; color: #555; }
+        .move-entry { display: flex; flex-direction: column; gap: 0; }
+        .move-entry + .move-entry { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 5px; margin-top: 3px; }
+        .move-row { font-family: monospace; line-height: 1.8; }
         .move-log .pm  { color: var(--gold); font-weight: 700; }
-        .move-log .om  { color: #888; }
+        .move-log .om  { color: #ccc; font-weight: 600; }
         .move-log .mn  { color: #555; }
+        .move-comments { display: flex; flex-direction: column; gap: 1px; padding-left: 20px; margin-bottom: 2px; }
+        .mc { font-size: 11px; line-height: 1.5; font-style: italic; }
+        .mc-player { color: rgba(245,166,35,0.75); }
+        .mc-opp    { color: rgba(255,255,255,0.38); }
 
         /* ── Chat column ── */
         .chat-section {
@@ -1069,7 +1079,7 @@ function onDrop(source, target) {
         moveIdx++;
         updateMoveLog();
         updateProgress();
-        setStatus('correct', `✓  ${move.san}  —  ${expected.comment}`);
+        setStatus('correct', `✓  ${move.san}  —  good move!`);
 
         if (moveIdx >= opening.moves.length) { completeOpening(); return; }
         setTimeout(playOpponentMove, 700);
@@ -1147,7 +1157,7 @@ function playOpponentMove() {
 
     if (moveIdx >= opening.moves.length) { completeOpening(); return; }
 
-    setStatus('info', `Opponent played ${move.san}. Your turn — what do you play?`);
+    setStatus('info', `${move.san} — your turn. What do you play?`);
 }
 
 function completeOpening() {
@@ -1267,18 +1277,73 @@ function updateProgress() {
 
 function updateMoveLog() {
     const log = document.getElementById('moveLog');
-    if (!playedSANs.length) { log.innerHTML = 'No moves yet.'; return; }
-
-    let html = '';
-    let mn   = 1;
-    for (let i = 0; i < moveIdx; i++) {
-        const m = opening.moves[i];
-        if (m.color === 'w') html += `<span class="mn">${mn}.</span> `;
-        const cls = m.color === opening.playerColor ? 'pm' : 'om';
-        html += `<span class="${cls}">${m.san}</span> `;
-        if (m.color === 'b') mn++;
+    if (!opening || !moveIdx) {
+        log.innerHTML = '<span class="empty-log">No moves yet.</span>';
+        return;
     }
-    log.innerHTML = html || 'No moves yet.';
+
+    // Group moves into pairs: [{white, black?}, ...]
+    // opening.moves[i].color is 'w' or 'b'
+    const pairs = [];
+    let i = 0;
+    while (i < moveIdx) {
+        const m = opening.moves[i];
+        if (m.color === 'w') {
+            const pair = { white: m, black: null };
+            if (i + 1 < moveIdx && opening.moves[i + 1].color === 'b') {
+                pair.black = opening.moves[i + 1];
+                i += 2;
+            } else {
+                i++;
+            }
+            pairs.push(pair);
+        } else {
+            // Black opens (player is Black, White played first opponent move)
+            pairs.push({ white: null, black: m });
+            i++;
+        }
+    }
+
+    const isPlayerWhite = opening.playerColor === 'w';
+    let html = '';
+    pairs.forEach((pair, idx) => {
+        const mn = idx + 1;
+        html += '<div class="move-entry">';
+
+        // Move row
+        html += '<div class="move-row">';
+        html += `<span class="mn">${mn}.</span> `;
+        if (pair.white) {
+            const cls = isPlayerWhite ? 'pm' : 'om';
+            html += `<span class="${cls}">${pair.white.san}</span> `;
+        }
+        if (pair.black) {
+            const cls = !isPlayerWhite ? 'pm' : 'om';
+            html += `<span class="${cls}">${pair.black.san}</span>`;
+        }
+        html += '</div>';
+
+        // Comments
+        const hasComment = (pair.white && pair.white.comment) || (pair.black && pair.black.comment);
+        if (hasComment) {
+            html += '<div class="move-comments">';
+            if (pair.white && pair.white.comment) {
+                const cls = isPlayerWhite ? 'mc mc-player' : 'mc mc-opp';
+                html += `<span class="${cls}">♙ ${pair.white.comment}</span>`;
+            }
+            if (pair.black && pair.black.comment) {
+                const cls = !isPlayerWhite ? 'mc mc-player' : 'mc mc-opp';
+                html += `<span class="${cls}">♟ ${pair.black.comment}</span>`;
+            }
+            html += '</div>';
+        }
+
+        html += '</div>';
+    });
+
+    log.innerHTML = html;
+    // Auto-scroll to latest move
+    log.scrollTop = log.scrollHeight;
 }
 
 // ═══════════════════════════════════════════════════════════════
