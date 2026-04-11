@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>♟ Chess Opening Trainer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #1a1a2e;
+            --surface:  #16213e;
+            --deep:     #0f3460;
+            --accent:   #e94560;
+            --gold:     #f5a623;
+            --green:    #2ecc71;
+            --text:     #eeeeee;
+            --muted:    #999999;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header h1 { font-size: 18px; color: var(--accent); white-space: nowrap; flex-shrink: 0; }
+
+        .opening-select {
+            flex: 1;
+            min-width: 0;
+            background: var(--deep);
+            color: var(--text);
+            border: 1px solid var(--accent);
+            padding: 9px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e94560' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        .opening-select optgroup { background: #1a1a2e; }
+        .opening-select option   { background: #1a1a2e; }
+
+        /* ── Main layout ── */
+        .main {
+            display: flex;
+            gap: 20px;
+            padding: 16px;
+            max-width: 1060px;
+            margin: 0 auto;
+        }
+
+        /* ── Board column ── */
+        .board-section { flex: 0 0 auto; width: 100%; max-width: 460px; }
+
+        #board-wrap { width: 100%; }
+        #board      { width: 100%; touch-action: none; }
+
+        .controls {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 11px 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: opacity .15s, transform .15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { opacity: .8; transform: scale(.97); }
+        .btn-hint  { background: var(--gold);   color: #1a1a2e; }
+        .btn-back  { background: #3498db;        color: #fff; }
+        .btn-reset { background: var(--accent);  color: #fff; }
+
+        .status-box {
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: var(--surface);
+            border-radius: 8px;
+            border-left: 4px solid var(--deep);
+            font-size: 13px;
+            min-height: 60px;
+            line-height: 1.55;
+        }
+        .status-box.correct { border-left-color: var(--green); }
+        .status-box.wrong   { border-left-color: var(--accent); }
+        .status-box.info    { border-left-color: #3498db; }
+        .status-box.hint    { border-left-color: var(--gold); }
+
+        .progress-wrap { margin-top: 10px; display: none; }
+        .progress-bar  { background: var(--deep); border-radius: 4px; height: 8px; }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            border-radius: 4px;
+            transition: width .35s;
+            width: 0%;
+        }
+        .progress-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+        .move-log {
+            margin-top: 10px;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #bbb;
+            min-height: 34px;
+            font-family: monospace;
+            line-height: 1.8;
+            word-break: break-word;
+        }
+        .move-log .pm  { color: var(--gold); font-weight: 700; }
+        .move-log .om  { color: #888; }
+        .move-log .mn  { color: #555; }
+
+        /* ── Chat column ── */
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .chat-section h2 { font-size: 15px; color: var(--accent); margin-bottom: 10px; }
+
+        .chat-messages {
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 12px;
+            height: 360px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .chat-msg {
+            padding: 10px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.55;
+            max-width: 95%;
+        }
+        .chat-msg.user {
+            background: var(--deep);
+            align-self: flex-end;
+            color: var(--text);
+        }
+        .chat-msg.assistant {
+            background: #1a2e4a;
+            align-self: flex-start;
+            border-left: 3px solid var(--accent);
+            color: #dde;
+        }
+        .chat-msg.system-msg {
+            background: transparent;
+            color: var(--muted);
+            font-style: italic;
+            font-size: 12px;
+            align-self: center;
+            text-align: center;
+        }
+
+        .thinking-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce .9s infinite ease-in-out;
+        }
+        .thinking-dot:nth-child(2) { animation-delay: .15s; }
+        .thinking-dot:nth-child(3) { animation-delay: .3s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40%            { transform: scale(1); }
+        }
+
+        .chat-input-area { display: flex; gap: 8px; }
+
+        .chat-input {
+            flex: 1;
+            background: var(--deep);
+            border: 1px solid #444;
+            color: var(--text);
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            height: 44px;
+            -webkit-appearance: none;
+        }
+        .chat-input:focus { outline: none; border-color: var(--accent); }
+
+        .btn-send {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-send:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* Square hints */
+        .hint-source { background-color: rgba(245,166,35,.75) !important; }
+        .hint-target  { background-color: rgba(46,204,113,.75) !important; }
+        .selected-sq  { background-color: rgba(52,152,219,.70) !important; }
+
+        /* ── Mobile layout ── */
+        @media (max-width: 720px) {
+            .main {
+                flex-direction: column;
+                padding: 12px;
+                gap: 16px;
+            }
+            .board-section { max-width: 100%; }
+            .chat-messages  { height: 260px; }
+            .btn            { font-size: 15px; padding: 13px 10px; }
+            .btn-send       { padding: 11px 14px; }
+            .chat-input     { font-size: 16px; } /* prevent iOS zoom on focus */
+        }
+
+        @media (max-width: 400px) {
+            .header h1 { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>♟ Opening Trainer</h1>
+    <select class="opening-select" id="openingSelect">
+        <option value="">— Pick an opening —</option>
+        <optgroup label="London System">
+            <option value="london-white">London System — You play White ♙</option>
+            <option value="london-black">London System — You play Black ♟</option>
+        </optgroup>
+        <optgroup label="Caro-Kann Defense">
+            <option value="caro-black">Caro-Kann — You play Black ♟</option>
+            <option value="caro-white">Caro-Kann — You play White ♙</option>
+        </optgroup>
+        <optgroup label="King's Indian Defense">
+            <option value="kid-black">King's Indian — You play Black ♟</option>
+            <option value="kid-white">King's Indian — You play White ♙</option>
+        </optgroup>
+        <optgroup label="Ruy Lopez (Spanish)">
+            <option value="ruy-white">Ruy Lopez — You play White ♙</option>
+            <option value="ruy-black">Ruy Lopez — You play Black ♟</option>
+        </optgroup>
+        <optgroup label="Italian Game">
+            <option value="italian-white">Italian Game — You play White ♙</option>
+            <option value="italian-black">Italian Game — You play Black ♟</option>
+        </optgroup>
+    </select>
+</div>
+
+<div class="main">
+    <!-- Board -->
+    <div class="board-section">
+        <div id="board-wrap"><div id="board"></div></div>
+
+        <div class="controls">
+            <button class="btn btn-hint"  onclick="showHint()">💡 Hint</button>
+            <button class="btn btn-back"  onclick="undoMove()">↩ Undo</button>
+            <button class="btn btn-reset" onclick="resetGame()">↺ Restart</button>
+        </div>
+
+        <div class="status-box info" id="statusBox">
+            Choose an opening above to begin. Drag pieces to make your moves.
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressLabel"></div>
+        </div>
+
+        <div class="move-log" id="moveLog">No moves yet.</div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-section">
+        <h2>🤖 Ask Your Chess Coach</h2>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg system-msg">
+                Pick an opening and ask anything!<br>
+                "Why is Bf4 played early?" &middot; "What's the plan for Black?" &middot; "Why c3 and not c4?"
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea class="chat-input" id="chatInput"
+                      placeholder="Ask about any move or idea…"
+                      onkeydown="handleChatKey(event)"></textarea>
+            <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// OPENING DATA — 6 openings, all verified legal
+// ═══════════════════════════════════════════════════════════════
+
+const OPENINGS = {
+
+  // ── LONDON SYSTEM ─────────────────────────────────────────────
+
+  'london-white': {
+    id: 'london-white', name: 'London System', playerColor: 'w',
+    description: 'You play White. Solid system with Bf4 — easy to learn, hard to face.',
+    moves: [
+      { san:'d4',   color:'w', comment:'Control the center with the queen\'s pawn — the foundation of the London.' },
+      { san:'d5',   color:'b', comment:'Black mirrors, claiming central space.' },
+      { san:'Nf3',  color:'w', comment:'Develop the knight to its best square, supporting d4 and eyeing e5 later.' },
+      { san:'Nf6',  color:'b', comment:'Black develops symmetrically.' },
+      { san:'Bf4',  color:'w', comment:'The London signature! Bring the bishop out NOW — after e3 it\'s locked in forever.',
+        sidelines: [
+          { san:'e3', feedback:"Don't play e3 before Bf4! Once e3 is on the board the bishop is trapped inside the pawns forever. Bf4 first — that's the London's golden rule." },
+          { san:'Bg5', feedback:"Bg5 is the Trompowsky Attack — a different opening! The London's defining move is Bf4, placing the bishop outside the pawn chain." }
+        ] },
+      { san:'e6',   color:'b', comment:'Black reinforces d5 and opens the dark-squared bishop diagonal.' },
+      { san:'e3',   color:'w', comment:'Now e3 is safe — the bishop is already outside. This supports d4 and prepares Bd3.' },
+      { san:'c5',   color:'b', comment:'Black challenges your center.' },
+      { san:'c3',   color:'w', comment:'Solidify d4. The c3–d4–e3 triangle is the London\'s rock-solid backbone.' },
+      { san:'Nc6',  color:'b', comment:'Black develops and adds more pressure to d4.' },
+      { san:'Nbd2', color:'w', comment:'Develop the queen\'s knight without blocking the bishop. Later heads for e4 or b3.' },
+      { san:'Bd6',  color:'b', comment:'Black eyes the f4 bishop, threatening to trade.' },
+      { san:'Bg3',  color:'w', comment:'Avoid the trade! The London bishop is valuable — on g3 it still watches e5.' },
+      { san:'O-O',  color:'b', comment:'Black castles to safety.' },
+      { san:'Bd3',  color:'w', comment:'Develop the remaining bishop — from d3 it eyes the h7 pawn.' },
+      { san:'b6',   color:'b', comment:'Prepare the Bb7 fianchetto.' },
+      { san:'O-O',  color:'w', comment:'Castle and complete development. White has a harmonious, solid setup.' },
+      { san:'Bb7',  color:'b', comment:'Black completes the fianchetto.' },
+      { san:'Ne5',  color:'w', comment:'The ideal London finisher — the knight claims the powerful e5 outpost. Excellent position!' },
+    ]
+  },
+
+  'london-black': {
+    id: 'london-black', name: 'London System', playerColor: 'b',
+    description: 'You play Black. Learn the solid response to the London — healthy pawns and active pieces.',
+    moves: [
+      { san:'d4',   color:'w', comment:'White opens with the London.' },
+      { san:'d5',   color:'b', comment:'Stake your central claim immediately — mirror White\'s first move.' },
+      { san:'Nf3',  color:'w', comment:'White develops the knight.' },
+      { san:'Nf6',  color:'b', comment:'Develop your knight to its best square, fighting for central control.' },
+      { san:'Bf4',  color:'w', comment:'The London bishop comes out.' },
+      { san:'e6',   color:'b', comment:'Support d5 and open the diagonal for your dark-squared bishop.' },
+      { san:'e3',   color:'w', comment:'White solidifies the center.' },
+      { san:'c5',   color:'b', comment:'Challenge White\'s center! This is key — don\'t let White sit comfortably on d4.' },
+      { san:'c3',   color:'w', comment:'White reinforces d4.' },
+      { san:'Nc6',  color:'b', comment:'Develop the knight and keep the pressure on d4.' },
+      { san:'Nbd2', color:'w', comment:'White completes minor piece development.' },
+      { san:'Bd6',  color:'b', comment:'Develop the bishop and eyeball White\'s f4 bishop — a trade would hurt White.' },
+      { san:'Bg3',  color:'w', comment:'White avoids the trade.' },
+      { san:'O-O',  color:'b', comment:'Castle to safety! King security first.' },
+      { san:'Bd3',  color:'w', comment:'White develops.' },
+      { san:'b6',   color:'b', comment:'Prepare to fianchetto your queen\'s bishop — it will be a powerhouse on b7.' },
+      { san:'O-O',  color:'w', comment:'White castles.' },
+      { san:'Bb7',  color:'b', comment:'Complete the fianchetto! The bishop on b7 controls the long diagonal and pressures e4.' },
+      { san:'Ne5',  color:'w', comment:'White\'s knight jumps to e5.' },
+      { san:'Nd7',  color:'b', comment:'Challenge the knight! Moving to d7 contests e5 and prepares ...f6 to kick it away.' },
+    ]
+  },
+
+  // ── CARO-KANN ─────────────────────────────────────────────────
+
+  'caro-black': {
+    id: 'caro-black', name: 'Caro-Kann Defense (Classical)', playerColor: 'b',
+    description: 'You play Black. Solid defense to 1.e4 — healthy pawns, active bishop, no early chaos.',
+    moves: [
+      { san:'e4',   color:'w', comment:'White claims the center.' },
+      { san:'c6',   color:'b', comment:'The Caro-Kann! Prepare d5 WITHOUT blocking the queen\'s bishop — unlike the French.' },
+      { san:'d4',   color:'w', comment:'White builds a two-pawn center.' },
+      { san:'d5',   color:'b', comment:'Challenge the center immediately — this is the whole point of 1…c6.' },
+      { san:'Nc3',  color:'w', comment:'Classical variation — White reinforces e4.' },
+      { san:'dxe4', color:'b', comment:'Exchange! Eliminate the center pawn and open lines to develop actively.' },
+      { san:'Nxe4', color:'w', comment:'White recaptures with the knight — it now dominates the center.' },
+      { san:'Bf5',  color:'b', comment:'The KEY Caro-Kann move! Develop the bishop OUTSIDE the pawns before …e6 traps it.',
+        sidelines: [
+          { san:'e6', feedback:"Stop! If you play e6 now the bishop is locked inside forever — that's exactly the French Defense problem the Caro-Kann avoids. Get Bf5 out first, then you can play e6 safely." },
+          { san:'Nf6', feedback:"Nf6 here allows Ng5, attacking f7 awkwardly. The Caro-Kann's big idea is Bf5 first — get the bishop outside before closing the position with e6." }
+        ] },
+      { san:'Ng3',  color:'w', comment:'White retreats to keep the bishop pair.' },
+      { san:'Bg6',  color:'b', comment:'Retreat the bishop — it\'s still useful on g6, controlling key squares.' },
+      { san:'h4',   color:'w', comment:'White immediately attacks the bishop.' },
+      { san:'h6',   color:'b', comment:'Stop h5! Defend the bishop — don\'t give ground for free.' },
+      { san:'Nf3',  color:'w', comment:'White develops the knight.' },
+      { san:'Nd7',  color:'b', comment:'Develop the queen\'s knight — reserve f6 for the g8 knight.' },
+      { san:'h5',   color:'w', comment:'White continues the assault on the bishop.' },
+      { san:'Bh7',  color:'b', comment:'Tuck the bishop away. It\'s passive but solid — we\'ll trade it off soon.' },
+      { san:'Bd3',  color:'w', comment:'White develops, planning to swap bishops.' },
+      { san:'Bxd3', color:'b', comment:'Trade it off! Remove White\'s strong bishop and open the c-file.' },
+      { san:'Qxd3', color:'w', comment:'White recaptures, centralizing the queen.' },
+      { san:'Ngf6', color:'b', comment:'Develop the last minor piece! Black has a sound, healthy position — ready to castle.' },
+    ]
+  },
+
+  'caro-white': {
+    id: 'caro-white', name: 'Caro-Kann Defense (Classical)', playerColor: 'w',
+    description: 'You play White. Learn to handle the Caro-Kann with the Classical variation and h4 attack.',
+    moves: [
+      { san:'e4',   color:'w', comment:'Open with the king\'s pawn — stake a claim in the center.' },
+      { san:'c6',   color:'b', comment:'Black plays the Caro-Kann, preparing ...d5.' },
+      { san:'d4',   color:'w', comment:'Build a strong two-pawn center. Control as much space as possible.' },
+      { san:'d5',   color:'b', comment:'Black challenges the center immediately.' },
+      { san:'Nc3',  color:'w', comment:'Classical variation — reinforce e4 with the knight.' },
+      { san:'dxe4', color:'b', comment:'Black exchanges, freeing the position.' },
+      { san:'Nxe4', color:'w', comment:'Recapture with the knight — it now dominates the center. Target c5 and f6.' },
+      { san:'Bf5',  color:'b', comment:'Black\'s key move — the bishop comes out before ...e6.' },
+      { san:'Ng3',  color:'w', comment:'Move the knight to avoid the bishop trade and keep your bishop pair.' },
+      { san:'Bg6',  color:'b', comment:'Black retreats the bishop.' },
+      { san:'h4',   color:'w', comment:'Attack the bishop at once! This forces Black to react and is a key White idea.' },
+      { san:'h6',   color:'b', comment:'Black stops h5.' },
+      { san:'Nf3',  color:'w', comment:'Develop the knight — connect rooks and prepare to castle.' },
+      { san:'Nd7',  color:'b', comment:'Black develops the queen\'s knight.' },
+      { san:'h5',   color:'w', comment:'Keep pressing — push the bishop to a passive square.' },
+      { san:'Bh7',  color:'b', comment:'Black tucks the bishop away.' },
+      { san:'Bd3',  color:'w', comment:'Develop the bishop and offer a trade that works in your favour.' },
+      { san:'Bxd3', color:'b', comment:'Black takes the trade.' },
+      { san:'Qxd3', color:'w', comment:'Recapture with the queen — centralized and eyeing the kingside.' },
+      { san:'Ngf6', color:'b', comment:'Black completes development.' },
+    ]
+  },
+
+  // ── KING'S INDIAN ─────────────────────────────────────────────
+
+  'kid-black': {
+    id: 'kid-black', name: "King's Indian Defense (Classical)", playerColor: 'b',
+    description: "You play Black. Dynamic fighting defense — let White build a center, then attack it.",
+    moves: [
+      { san:'d4',  color:'w', comment:"White opens with the queen's pawn." },
+      { san:'Nf6', color:'b', comment:"Develop the knight and immediately fight for central squares." },
+      { san:'c4',  color:'w', comment:"White builds a large pawn center." },
+      { san:'g6',  color:'b', comment:"Prepare the fianchetto. The King's Indian bishop on g7 is your most important piece." },
+      { san:'Nc3', color:'w', comment:"White develops and reinforces the center." },
+      { san:'Bg7', color:'b', comment:"Complete the fianchetto! This dragon bishop on g7 will dominate the long diagonal." },
+      { san:'e4',  color:'w', comment:"White claims the maximum center." },
+      { san:'d6',  color:'b', comment:"Prepare ...e5. The d6 pawn supports the coming counterattack." },
+      { san:'Nf3', color:'w', comment:"White develops." },
+      { san:'O-O', color:'b', comment:"Castle quickly! King safety first — then launch the ...e5 attack." },
+      { san:'Be2', color:'w', comment:"Classical variation — solid development." },
+      { san:'e5',  color:'b', comment:"The KEY King's Indian move! Challenge White's center — this pawn defines your whole game." },
+      { san:'O-O', color:'w', comment:"White castles." },
+      { san:'Nc6', color:'b', comment:"Develop and pressure d4 — White must react to the center tension." },
+      { san:'d5',  color:'w', comment:"White closes the center — both sides now race on opposite wings." },
+      { san:'Ne7', color:'b', comment:"Reroute the knight toward the kingside attack — it aims for g6 or f5." },
+      { san:'Ne1', color:'w', comment:"White repositions toward d3." },
+      { san:'Nd7', color:'b', comment:"Clear the way for the f-pawn advance. The kingside storm is coming!" },
+      { san:'Nd3', color:'w', comment:"White's knight reaches d3, supporting queenside play." },
+      { san:'f5',  color:'b', comment:"Launch the kingside attack! This is what Black has been building toward." },
+    ]
+  },
+
+  'kid-white': {
+    id: 'kid-white', name: "King's Indian Defense (Classical)", playerColor: 'w',
+    description: "You play White. Learn to handle the King's Indian with the Classical variation and queenside play.",
+    moves: [
+      { san:'d4',  color:'w', comment:"Open with the queen's pawn and prepare to build a large center." },
+      { san:'Nf6', color:'b', comment:"Black plays the King's Indian knight." },
+      { san:'c4',  color:'w', comment:"Build a large pawn center — this is the start of the King's Indian setup." },
+      { san:'g6',  color:'b', comment:"Black prepares the King's Indian fianchetto." },
+      { san:'Nc3', color:'w', comment:"Develop the knight and reinforce the center." },
+      { san:'Bg7', color:'b', comment:"Black completes the fianchetto." },
+      { san:'e4',  color:'w', comment:"Claim the maximum center! You now control c4, d4, and e4 — a powerful position." },
+      { san:'d6',  color:'b', comment:"Black prepares the ...e5 counterattack." },
+      { san:'Nf3', color:'w', comment:"Develop the kingside knight, connecting rooks and preparing to castle." },
+      { san:'O-O', color:'b', comment:"Black castles." },
+      { san:'Be2', color:'w', comment:"Classical variation — solid, flexible development. Prepare to castle." },
+      { san:'e5',  color:'b', comment:"Black's key move — challenging your center." },
+      { san:'O-O', color:'w', comment:"Castle to safety while keeping the center tension." },
+      { san:'Nc6', color:'b', comment:"Black develops and pressures d4." },
+      { san:'d5',  color:'w', comment:"Close the center! Both sides now race on opposite wings — you go queenside." },
+      { san:'Ne7', color:'b', comment:"Black reroutes the knight for the kingside attack." },
+      { san:'Ne1', color:'w', comment:"Reroute your own knight — it heads to d3 to support queenside expansion with c5." },
+      { san:'Nd7', color:'b', comment:"Black prepares the f5 pawn advance." },
+      { san:'Nd3', color:'w', comment:"Your knight reaches its ideal square — ready to support c5 or b4." },
+      { san:'f5',  color:'b', comment:"Black launches the kingside attack." },
+    ]
+  },
+
+  // ── RUY LOPEZ (SPANISH) ───────────────────────────────────────
+
+  'ruy-white': {
+    id: 'ruy-white', name: 'Ruy Lopez (Spanish)', playerColor: 'w',
+    description: "You play White. The most classical 1.e4 e5 opening — pin Black's knight and fight for the center.",
+    moves: [
+      { san:'e4',  color:'w', comment:"Open with the king's pawn — fight for the center and open lines for your pieces." },
+      { san:'e5',  color:'b', comment:"Black claims central space." },
+      { san:'Nf3', color:'w', comment:"Develop the knight and attack the e5 pawn immediately." },
+      { san:'Nc6', color:'b', comment:"Black defends e5 with the knight." },
+      { san:'Bb5', color:'w', comment:"The Ruy Lopez! The bishop pins the knight defending e5 — indirectly pressuring the center.",
+        sidelines: [
+          { san:'Bc4', feedback:"That's the Italian Game — also a great opening! But here we're drilling the Ruy Lopez. Play Bb5 to pin the Nc6 and apply indirect pressure on the center." },
+          { san:'d4', feedback:"d4 too early runs into ...exd4 and Black equalises easily. Develop with Bb5 first — the Ruy Lopez builds pressure before opening the center." }
+        ] },
+      { san:'a6',  color:'b', comment:"The Morphy Defense — Black kicks the bishop immediately." },
+      { san:'Ba4', color:'w', comment:"Retreat but keep the pressure alive. Staying on the a4-e8 diagonal maintains the pin." },
+      { san:'Nf6', color:'b', comment:"Black develops and counterattacks e4." },
+      { san:'O-O', color:'w', comment:"Castle early! The Ruy Lopez rewards quick king safety before everything else." },
+      { san:'Be7', color:'b', comment:"Black prepares to castle." },
+      { san:'Re1', color:'w', comment:"Reinforce e4 with the rook — this is a critical Ruy Lopez idea. The rook belongs on e1." },
+      { san:'b5',  color:'b', comment:"Black gains queenside space and attacks the bishop." },
+      { san:'Bb3', color:'w', comment:"Retreat to b3 — the bishop is safe and still aims powerfully at f7." },
+      { san:'O-O', color:'b', comment:"Black castles." },
+      { san:'c3',  color:'w', comment:"Prepare the d4 break — the signature Ruy Lopez central advance." },
+      { san:'d6',  color:'b', comment:"Black reinforces e5." },
+      { san:'h3',  color:'w', comment:"Prevent Bg4 pinning your f3 knight — a small prophylactic move with big value." },
+      { san:'Na5', color:'b', comment:"Black attacks your bishop on b3." },
+      { san:'Bc2', color:'w', comment:"Retreat the bishop — on c2 it supports the center and eyes h7." },
+      { san:'c5',  color:'b', comment:"Black stakes out queenside territory. Now push d4 to open the game." },
+    ]
+  },
+
+  'ruy-black': {
+    id: 'ruy-black', name: 'Ruy Lopez (Spanish)', playerColor: 'b',
+    description: "You play Black. Learn the Morphy Defense — the most trusted response to the Ruy Lopez.",
+    moves: [
+      { san:'e4',  color:'w', comment:"White opens with the king's pawn." },
+      { san:'e5',  color:'b', comment:"Claim your share of the center! Meet 1.e4 with 1...e5 — fight for the center directly." },
+      { san:'Nf3', color:'w', comment:"White develops and attacks e5." },
+      { san:'Nc6', color:'b', comment:"Defend e5 with the knight — develop and defend in one move." },
+      { san:'Bb5', color:'w', comment:"The Ruy Lopez — White pins your knight, indirectly threatening e5." },
+      { san:'a6',  color:'b', comment:"The Morphy Defense! Attack the bishop immediately — force it to show its intentions.",
+        sidelines: [
+          { san:'Nf6', feedback:"That's the Berlin Defense — famously solid and used by Magnus Carlsen to win World Championships! But here we're drilling the Morphy Defense. Play a6 to attack the bishop and gain queenside space." },
+          { san:'Bc5', feedback:"That's the Classical Defense — playable but less popular today. The Morphy with a6 is more active: it attacks the bishop and prepares ...b5 to gain space." }
+        ] },
+      { san:'Ba4', color:'w', comment:"White keeps the pressure alive." },
+      { san:'Nf6', color:'b', comment:"Develop and attack e4 — counter-pressure is the key to handling the Ruy Lopez." },
+      { san:'O-O', color:'w', comment:"White castles." },
+      { san:'Be7', color:'b', comment:"Prepare to castle — develop the bishop modestly but solidly to e7." },
+      { san:'Re1', color:'w', comment:"White reinforces e4." },
+      { san:'b5',  color:'b', comment:"Gain queenside space and attack the bishop! This is a key Black idea — b5 is strong here." },
+      { san:'Bb3', color:'w', comment:"White retreats the bishop to b3." },
+      { san:'O-O', color:'b', comment:"Castle to safety! The kingside is clear — get your king safe now." },
+      { san:'c3',  color:'w', comment:"White prepares d4." },
+      { san:'d6',  color:'b', comment:"Reinforce e5 — make that central pawn a solid pillar." },
+      { san:'h3',  color:'w', comment:"White prevents Bg4." },
+      { san:'Na5', color:'b', comment:"Attack the bishop on b3! Chase it from its active diagonal — a key Black maneuver." },
+      { san:'Bc2', color:'w', comment:"White retreats the bishop." },
+      { san:'c5',  color:'b', comment:"Expand on the queenside! The c5 push gives Black active counterplay against the coming d4." },
+    ]
+  },
+
+  // ── ITALIAN GAME ─────────────────────────────────────────────
+
+  'italian-white': {
+    id: 'italian-white', name: 'Italian Game (Giuoco Pianissimo)', playerColor: 'w',
+    description: "You play White. The classic Bc4 opening — target f7 and build a slow, solid center.",
+    moves: [
+      { san:'e4',   color:'w', comment:"Open with the king's pawn — the Italian Game begins here." },
+      { san:'e5',   color:'b', comment:"Black mirrors, claiming central space." },
+      { san:'Nf3',  color:'w', comment:"Develop the knight and attack the e5 pawn." },
+      { san:'Nc6',  color:'b', comment:"Black defends e5." },
+      { san:'Bc4',  color:'w', comment:"The Italian bishop! It eyes the f7 square — Black's weakest point in the opening.",
+        sidelines: [
+          { san:'Bb5', feedback:"That's the Ruy Lopez — also an excellent opening! But here we're drilling the Italian Game. Play Bc4 to target f7, Black's weakest square in the opening." },
+          { san:'d4', feedback:"d4 here is premature — after ...exd4 Black equalises before you're developed. Get the Italian bishop to c4 first, then build the center." }
+        ] },
+      { san:'Bc5',  color:'b', comment:"Giuoco Piano ('quiet game') — Black mirrors the bishop development." },
+      { san:'d3',   color:'w', comment:"Giuoco Pianissimo — solid and patient. Support e4 and prepare Nbd2." },
+      { san:'Nf6',  color:'b', comment:"Black develops and counterattacks e4." },
+      { san:'c3',   color:'w', comment:"Prepare the d4 advance — slowly building a bigger center step by step." },
+      { san:'d6',   color:'b', comment:"Black reinforces e5 and prepares to develop the c8 bishop." },
+      { san:'O-O',  color:'w', comment:"Castle before pushing — king safety first, then the central break." },
+      { san:'O-O',  color:'b', comment:"Black castles." },
+      { san:'Nbd2', color:'w', comment:"Develop the queen's knight to d2 — from here it reroutes to f1 then g3 for kingside play." },
+      { san:'a6',   color:'b', comment:"Black prevents Bb5 and prepares queenside expansion." },
+      { san:'Bb3',  color:'w', comment:"Preserve the bishop! On b3 it stays on the powerful a2-g8 diagonal aiming at f7." },
+      { san:'Ba7',  color:'b', comment:"Black retreats the bishop to a7." },
+      { san:'Re1',  color:'w', comment:"Support e4 and prepare Nf1 — the knight reroutes via f1 to g3 for kingside activity." },
+      { san:'Re8',  color:'b', comment:"Black supports e5 and prepares to contest the e-file." },
+    ]
+  },
+
+  'italian-black': {
+    id: 'italian-black', name: 'Italian Game (Giuoco Pianissimo)', playerColor: 'b',
+    description: "You play Black. Learn the Giuoco Piano response — mirror White's development and contest the center.",
+    moves: [
+      { san:'e4',   color:'w', comment:"White opens with the king's pawn." },
+      { san:'e5',   color:'b', comment:"Claim central space immediately — meet e4 with e5." },
+      { san:'Nf3',  color:'w', comment:"White develops and attacks e5." },
+      { san:'Nc6',  color:'b', comment:"Defend e5 and develop at the same time — a model response." },
+      { san:'Bc4',  color:'w', comment:"The Italian bishop — White eyes f7." },
+      { san:'Bc5',  color:'b', comment:"Mirror White! Develop the bishop to c5 — it eyes f2 and contests the center.",
+        sidelines: [
+          { san:'Nf6', feedback:"Nf6 leads to the Two Knights Defense — very tactical and fun! But here we're drilling the Giuoco Piano. Play Bc5 to mirror White's bishop and fight for the center symmetrically." },
+          { san:'Be7', feedback:"Be7 is too passive — it doesn't contest the center at all. Mirror White with Bc5 and put your bishop on an active square." }
+        ] },
+      { san:'d3',   color:'w', comment:"White plays the Giuoco Pianissimo — slow and solid." },
+      { san:'Nf6',  color:'b', comment:"Develop and attack e4 — keep the pressure on White's central pawn." },
+      { san:'c3',   color:'w', comment:"White prepares d4." },
+      { san:'d6',   color:'b', comment:"Reinforce e5 — a solid pawn chain is the backbone of your position." },
+      { san:'O-O',  color:'w', comment:"White castles." },
+      { san:'O-O',  color:'b', comment:"Castle to safety! Both sides are well developed — time to get the king safe." },
+      { san:'Nbd2', color:'w', comment:"White develops the queen's knight." },
+      { san:'a6',   color:'b', comment:"Prevent Bb5 and prepare ...b5 — stake out queenside territory." },
+      { san:'Bb3',  color:'w', comment:"White retreats the bishop to b3." },
+      { san:'Ba7',  color:'b', comment:"Retreat the bishop to a7 — it stays on the long diagonal, watching f2." },
+      { san:'Re1',  color:'w', comment:"White reinforces e4." },
+      { san:'Re8',  color:'b', comment:"Support e5 and contest the e-file — an excellent rook move in this structure." },
+    ]
+  }
+
+};
+
+// ═══════════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════════
+
+let game           = null;
+let board          = null;
+let opening        = null;
+let moveIdx        = 0;
+let isComplete     = false;
+let playedSANs     = [];
+let selectedSquare = null;
+// API calls are proxied through /.netlify/functions/chat (key lives server-side)
+
+// ═══════════════════════════════════════════════════════════════
+// BOARD SIZING (responsive)
+// ═══════════════════════════════════════════════════════════════
+
+function boardSize() {
+    return Math.min(460, window.innerWidth - 32);
+}
+
+function applyBoardSize() {
+    document.getElementById('board-wrap').style.width = boardSize() + 'px';
+}
+
+window.addEventListener('resize', () => {
+    applyBoardSize();
+    if (board) board.resize();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// BOARD INIT
+// ═══════════════════════════════════════════════════════════════
+
+function initBoard() {
+    applyBoardSize();
+    board = Chessboard('board', {
+        draggable: true,
+        position:  'start',
+        onDragStart,
+        onDrop,
+        onSnapEnd,
+        pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+    });
+
+    bindClickToMove();
+}
+
+function squareFromCoords(clientX, clientY) {
+    const el = document.getElementById('board');
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const sqSize = rect.width / 8;
+    const isWhite = board.orientation() === 'white';
+    const file = isWhite ? Math.floor(x / sqSize) : 7 - Math.floor(x / sqSize);
+    const rank = isWhite ? 7 - Math.floor(y / sqSize) : Math.floor(y / sqSize);
+    if (file < 0 || file > 7 || rank < 0 || rank > 7) return null;
+    return 'abcdefgh'[file] + (rank + 1);
+}
+
+function bindClickToMove() {
+    let downSquare = null;
+    const el = document.getElementById('board');
+
+    el.addEventListener('mousedown', function(e) {
+        downSquare = squareFromCoords(e.clientX, e.clientY);
+    });
+
+    el.addEventListener('mouseup', function(e) {
+        if (!downSquare) return;
+        const upSquare = squareFromCoords(e.clientX, e.clientY);
+        const from = downSquare;
+        downSquare = null;
+        if (upSquare !== from) return; // released on a different square — was a drag
+        const piece = board.position()[from] || null;
+        onSquareClick(from, piece);
+    });
+}
+
+function onDragStart(source, piece) {
+    if (!opening || isComplete || game.game_over()) return false;
+    if (game.turn() !== opening.playerColor) return false;
+    if (opening.playerColor === 'w' && piece.startsWith('b')) return false;
+    if (opening.playerColor === 'b' && piece.startsWith('w')) return false;
+    return true;
+}
+
+function onDrop(source, target) {
+    clearHints();
+
+    // Same-square drop = click-to-move selection toggle
+    if (source === target) {
+        if (opening && !isComplete && !game.game_over() && game.turn() === opening.playerColor) {
+            const piece = board.position()[source];
+            const isOwn = piece && (
+                (opening.playerColor === 'w' && piece.startsWith('w')) ||
+                (opening.playerColor === 'b' && piece.startsWith('b'))
+            );
+            if (isOwn) {
+                // Toggle: deselect if already selected, otherwise select
+                if (selectedSquare === source) {
+                    clearSelection();
+                } else {
+                    clearSelection();
+                    selectedSquare = source;
+                    $(`#board .square-${source}`).addClass('selected-sq');
+                }
+            }
+        }
+        return 'snapback';
+    }
+
+    // Normal drop: clear any active selection and attempt the move
+    clearSelection();
+    if (!opening || isComplete) return 'snapback';
+
+    const expected = opening.moves[moveIdx];
+    if (!expected || expected.color !== game.turn()) return 'snapback';
+
+    const move = game.move({ from: source, to: target, promotion: 'q' });
+    if (!move) return 'snapback';
+
+    if (move.san === expected.san) {
+        playedSANs.push({ san: move.san, isPlayer: true });
+        moveIdx++;
+        updateMoveLog();
+        updateProgress();
+        setStatus('correct', `✓  ${move.san}  —  ${expected.comment}`);
+
+        if (moveIdx >= opening.moves.length) { completeOpening(); return; }
+        setTimeout(playOpponentMove, 700);
+    } else {
+        const sideline = expected.sidelines && expected.sidelines.find(s => s.san === move.san);
+        game.undo();
+        if (sideline) {
+            setStatus('hint', `📖 ${move.san} — ${sideline.feedback}`);
+        } else {
+            setStatus('wrong', `✗  ${move.san} isn't the right move here. Think it through — or tap 💡 for a hint.`);
+        }
+        return 'snapback';
+    }
+}
+
+function onSnapEnd() {
+    if (board && game) board.position(game.fen());
+    // Re-apply selection highlight — board.position() may remove piece elements
+    // and trigger repaints that wipe square CSS classes
+    if (selectedSquare) {
+        $(`#board .square-${selectedSquare}`).addClass('selected-sq');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OPENING LOGIC
+// ═══════════════════════════════════════════════════════════════
+
+function loadOpening(id) {
+    opening    = OPENINGS[id];
+    if (!opening) return;
+
+    game       = new Chess();
+    moveIdx    = 0;
+    isComplete = false;
+    playedSANs = [];
+    clearSelection();
+
+    const orient = opening.playerColor === 'w' ? 'white' : 'black';
+    if (board.orientation() !== orient) board.orientation(orient);
+    board.position('start');
+
+    document.getElementById('progressWrap').style.display = 'block';
+    updateProgress();
+    updateMoveLog();
+
+    if (opening.playerColor === 'w') {
+        setStatus('info', "You're playing White ♙ — make your first move!");
+    } else {
+        setStatus('info', "You're playing Black ♟ — watch White's opening move…");
+        setTimeout(playOpponentMove, 900);
+    }
+
+    addChat('system-msg', `Loaded: ${opening.name} (${opening.playerColor === 'w' ? 'White' : 'Black'}). Ask me anything!`);
+}
+
+function playOpponentMove() {
+    if (!opening || isComplete) return;
+
+    const opp = opening.moves[moveIdx];
+    if (!opp || opp.color === opening.playerColor) return;
+
+    const move = game.move(opp.san);
+    if (!move) { console.error('Bad opponent move:', opp.san); return; }
+
+    playedSANs.push({ san: move.san, isPlayer: false });
+    board.position(game.fen());
+    moveIdx++;
+    updateMoveLog();
+    updateProgress();
+
+    if (moveIdx >= opening.moves.length) { completeOpening(); return; }
+
+    setStatus('info', `Opponent played ${move.san}. Your turn — what do you play?`);
+}
+
+function completeOpening() {
+    isComplete = true;
+    updateProgress();
+    setStatus('correct', '🎉  Line complete! Great work. Tap ↺ Restart to drill it again.');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HINT
+// ═══════════════════════════════════════════════════════════════
+
+function showHint() {
+    if (!opening || isComplete) return;
+    const expected = opening.moves[moveIdx];
+    if (!expected || expected.color !== opening.playerColor) return;
+
+    clearHints();
+
+    const legal = game.moves({ verbose: true });
+    const hm    = legal.find(m => m.san === expected.san);
+
+    if (hm) {
+        $(`#board .square-${hm.from}`).addClass('hint-source');
+        $(`#board .square-${hm.to}`).addClass('hint-target');
+        setStatus('hint', `💡  Move ${hm.from.toUpperCase()} → ${hm.to.toUpperCase()}   (${expected.san})`);
+    } else {
+        setStatus('hint', `💡  Play ${expected.san}`);
+    }
+}
+
+function clearHints() {
+    $('[class*="square-"]').removeClass('hint-source hint-target');
+}
+
+function clearSelection() {
+    if (selectedSquare) {
+        $(`#board .square-${selectedSquare}`).removeClass('selected-sq');
+        selectedSquare = null;
+    }
+}
+
+function onSquareClick(square, piece) {
+    // Only act as a destination click — own-piece selection is handled by onDrop(src, src)
+    if (!selectedSquare) return;
+    if (!opening || isComplete || game.game_over()) return;
+    if (game.turn() !== opening.playerColor) return;
+
+    const isOwnPiece = piece &&
+        ((opening.playerColor === 'w' && piece.startsWith('w')) ||
+         (opening.playerColor === 'b' && piece.startsWith('b')));
+
+    // Clicking own piece — let onDrop(src,src) handle selection switching via drag
+    if (isOwnPiece) return;
+
+    // Attempt the move
+    const from = selectedSquare;
+    clearSelection();
+    onDrop(from, square);
+    board.position(game.fen());
+}
+
+function resetGame() {
+    if (!opening) return;
+    loadOpening(opening.id);
+}
+
+function undoMove() {
+    if (!opening || !game) return;
+    if (!playedSANs.some(m => m.isPlayer)) return; // no player moves to undo
+
+    // Walk backwards to find the last player move (plus any opponent moves after it)
+    let steps = 0;
+    let idx = moveIdx - 1;
+    while (idx >= 0) {
+        steps++;
+        if (opening.moves[idx].color === opening.playerColor) break;
+        idx--;
+    }
+
+    for (let i = 0; i < steps; i++) game.undo();
+    moveIdx -= steps;
+    playedSANs.splice(playedSANs.length - steps, steps);
+    isComplete = false;
+
+    clearHints();
+    clearSelection();
+    board.position(game.fen());
+    updateMoveLog();
+    updateProgress();
+    setStatus('info', '↩ Move undone. What do you play here?');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function setStatus(type, msg) {
+    const box = document.getElementById('statusBox');
+    box.className = 'status-box ' + type;
+    box.textContent = msg;
+}
+
+function updateProgress() {
+    if (!opening) return;
+    const playerMoves = opening.moves.filter(m => m.color === opening.playerColor);
+    let done = 0;
+    for (let i = 0; i < moveIdx; i++) {
+        if (opening.moves[i].color === opening.playerColor) done++;
+    }
+    const pct = playerMoves.length ? (done / playerMoves.length) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent =
+        `Your moves: ${done} / ${playerMoves.length}` + (isComplete ? '  ✓ Complete!' : '');
+}
+
+function updateMoveLog() {
+    const log = document.getElementById('moveLog');
+    if (!playedSANs.length) { log.innerHTML = 'No moves yet.'; return; }
+
+    let html = '';
+    let mn   = 1;
+    for (let i = 0; i < moveIdx; i++) {
+        const m = opening.moves[i];
+        if (m.color === 'w') html += `<span class="mn">${mn}.</span> `;
+        const cls = m.color === opening.playerColor ? 'pm' : 'om';
+        html += `<span class="${cls}">${m.san}</span> `;
+        if (m.color === 'b') mn++;
+    }
+    log.innerHTML = html || 'No moves yet.';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLAUDE CHAT
+// ═══════════════════════════════════════════════════════════════
+
+function handleChatKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const q     = input.value.trim();
+    if (!q) return;
+
+    input.value = '';
+    addChat('user', q);
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+
+    // Animated thinking bubble
+    const loader = document.createElement('div');
+    loader.className = 'chat-msg assistant';
+    loader.innerHTML = '<span class="thinking-dot"></span><span class="thinking-dot"></span><span class="thinking-dot"></span>';
+    document.getElementById('chatMessages').appendChild(loader);
+    document.getElementById('chatMessages').scrollTop = 99999;
+
+    try {
+        const openingName  = opening ? `${opening.name} (playing as ${opening.playerColor === 'w' ? 'White' : 'Black'})` : 'no opening selected';
+        const fen          = game ? game.fen() : 'starting position';
+        const movesPlayed  = playedSANs.map(m => m.san).join(' ') || 'none yet';
+        const nextExpected = opening && moveIdx < opening.moves.length
+            ? `The next expected move is: ${opening.moves[moveIdx].san}`
+            : 'The line is complete.';
+
+        const system = `You are a friendly chess coach helping a 700 ELO beginner-intermediate player learn chess openings. They are studying: ${openingName}.
+
+Current position FEN: ${fen}
+Moves played so far: ${movesPlayed}
+${nextExpected}
+
+Answer in simple, encouraging language appropriate for a 700 ELO player. Keep responses to 2–4 sentences. Focus on the PURPOSE and IDEAS behind moves, not just what they do mechanically. Be warm and supportive.`;
+
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                model:      'claude-haiku-4-5-20251001',
+                max_tokens: 350,
+                system,
+                messages:   [{ role: 'user', content: q }]
+            })
+        });
+
+        loader.remove();
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        addChat('assistant', data.content[0].text);
+
+    } catch (err) {
+        loader.remove();
+        addChat('system-msg', `⚠ Error: ${err.message}`);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function addChat(role, text) {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    div.textContent = text;
+    const c = document.getElementById('chatMessages');
+    c.appendChild(div);
+    c.scrollTop = c.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+
+$(document).ready(function () {
+    initBoard();
+
+    document.getElementById('openingSelect').addEventListener('change', function () {
+        const val = this.value;
+        if (val && OPENINGS[val]) loadOpening(val);
+    });
+});
+</script>
+</body>
+</html>
