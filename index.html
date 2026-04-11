@@ -256,9 +256,78 @@
         @media (max-width: 400px) {
             .header h1 { font-size: 16px; }
         }
+
+        @media (max-width: 400px) {
+            .btn-label { display: none; }
+            .btn { font-size: 20px; padding: 13px 6px; }
+        }
+
+        #freePlayBar { margin-top: 10px; }
+        .fp-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .btn-fp-exit { padding: 8px 14px; border: 1px solid var(--accent); border-radius: 8px; background: var(--deep); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; }
+        .fp-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #a0a0b0; }
+        #skillSlider { width: 100px; }
+        #fpStatus { font-size: 13px; color: var(--gold); font-weight: 600; }
+        .btn-fp { background: var(--deep); border: 1px solid var(--gold); color: var(--gold); }
+
+        .sr-bar { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+        .sr-badge { background: var(--accent); color: white; border-radius: 12px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+        .btn-drill { flex: 1; padding: 9px 10px; border: 1px solid var(--accent); border-radius: 8px; background: var(--deep); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; }
+
+        #chatFab {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .fab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--gold);
+            color: #1a1a2e;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 720px) {
+            #chatFab { display: flex; }
+            .chat-section {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60vh;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                z-index: 999;
+                border-radius: 16px 16px 0 0;
+                padding: 16px;
+            }
+            .chat-section.open { transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
+
+<button id="chatFab" onclick="toggleChat()">💬<span class="fab-badge" id="fabBadge" style="display:none">0</span></button>
 
 <div class="header">
     <h1>♟ Opening Trainer</h1>
@@ -284,6 +353,18 @@
             <option value="italian-white">Italian Game — You play White ♙</option>
             <option value="italian-black">Italian Game — You play Black ♟</option>
         </optgroup>
+        <optgroup label="Sicilian Defense">
+            <option value="sicilian-white">Sicilian Defense — You play White ♙</option>
+            <option value="sicilian-black">Sicilian (Najdorf) — You play Black ♟</option>
+        </optgroup>
+        <optgroup label="French Defense">
+            <option value="french-white">French Defense — You play White ♙</option>
+            <option value="french-black">French Defense — You play Black ♟</option>
+        </optgroup>
+        <optgroup label="Queen's Gambit">
+            <option value="qgd-white">Queen's Gambit — You play White ♙</option>
+            <option value="qgd-black">QGD — You play Black ♟</option>
+        </optgroup>
     </select>
 </div>
 
@@ -292,10 +373,26 @@
     <div class="board-section">
         <div id="board-wrap"><div id="board"></div></div>
 
-        <div class="controls">
-            <button class="btn btn-hint"  onclick="showHint()">💡 Hint</button>
-            <button class="btn btn-back"  onclick="undoMove()">↩ Undo</button>
-            <button class="btn btn-reset" onclick="resetGame()">↺ Restart</button>
+        <div class="controls" id="trainerControls">
+            <button class="btn btn-hint"  onclick="showHint()">💡 <span class="btn-label">Hint</span></button>
+            <button class="btn btn-back"  onclick="undoMove()">↩ <span class="btn-label">Undo</span></button>
+            <button class="btn btn-reset" onclick="resetGame()">↺ <span class="btn-label">Restart</span></button>
+            <button class="btn btn-fp" onclick="enterFreePlay()">♟ <span class="btn-label">Free Play</span></button>
+        </div>
+
+        <div id="freePlayBar" style="display:none">
+            <div class="fp-controls">
+                <button class="btn-fp-exit" onclick="exitFreePlay()">← Back</button>
+                <label class="fp-label">Difficulty: <span id="skillLabel">5</span>
+                    <input type="range" id="skillSlider" min="1" max="10" value="5" oninput="setSkillLevel(this.value)">
+                </label>
+            </div>
+            <div id="fpStatus">Free play — you move first!</div>
+        </div>
+
+        <div class="sr-bar" id="srBar" style="display:none">
+            <span class="sr-badge" id="srBadge"></span>
+            <button class="btn btn-drill" onclick="drillWeakMoves()">🎯 <span class="btn-label">Drill Weak Moves</span></button>
         </div>
 
         <div class="status-box info" id="statusBox">
@@ -637,6 +734,188 @@ const OPENINGS = {
       { san:'Re1',  color:'w', comment:"White reinforces e4." },
       { san:'Re8',  color:'b', comment:"Support e5 and contest the e-file — an excellent rook move in this structure." },
     ]
+  },
+
+  // ── SICILIAN DEFENSE ──────────────────────────────────────────
+
+  'sicilian-white': {
+    id: 'sicilian-white', name: 'Sicilian Defense (Open)', playerColor: 'w',
+    description: 'The most popular response to 1.e4. White enters the Open Sicilian with 2.Nf3 and 3.d4.',
+    moves: [
+      { san:'e4',   color:'w', comment:'Central control, inviting the Sicilian.' },
+      { san:'c5',   color:'b', comment:'The Sicilian — fighting for d4 without symmetry.' },
+      { san:'Nf3',  color:'w', comment:'Developing toward d4.',
+        sidelines: [
+          { san:'d4', feedback:'The Smith-Morra Gambit — ambitious but theory-heavy.' }
+        ] },
+      { san:'d6',   color:'b', comment:'Preparing ...e5 or ...Nf6.' },
+      { san:'d4',   color:'w', comment:'Opening the center — the key pawn trade.' },
+      { san:'cxd4', color:'b', comment:"Black dissolves White's central pawn." },
+      { san:'Nxd4', color:'w', comment:'Recapturing with the knight, maintaining control.' },
+      { san:'Nf6',  color:'b', comment:'Attacking e4 and developing.' },
+      { san:'Nc3',  color:'w', comment:'Defending e4 and developing.' },
+      { san:'a6',   color:'b', comment:'The Najdorf move — preventing Bb5+ and preparing ...e5.' },
+      { san:'Be3',  color:'w', comment:'The English Attack setup.',
+        sidelines: [
+          { san:'Bg5', feedback:'The Classical variation — pinning the Nf6 immediately.' }
+        ] },
+      { san:'e5',   color:'b', comment:'Kicking the knight from d4.' },
+      { san:'Nb3',  color:'w', comment:'Retreating to a good square.' },
+      { san:'Be6',  color:'b', comment:'Developing the bishop to an active square.' },
+      { san:'f3',   color:'w', comment:'Preparing g4-g5 in the English Attack.' },
+    ]
+  },
+
+  'sicilian-black': {
+    id: 'sicilian-black', name: 'Sicilian Defense — Najdorf', playerColor: 'b',
+    description: 'The sharpest Sicilian. Black fights for the initiative from move one.',
+    moves: [
+      { san:'e4',   color:'w', comment:'White stakes the center.' },
+      { san:'c5',   color:'b', comment:'The Sicilian — asymmetric fight for d4.' },
+      { san:'Nf3',  color:'w', comment:'Heading for d4.' },
+      { san:'d6',   color:'b', comment:'Flexible — supports ...e5 and ...Nf6.' },
+      { san:'d4',   color:'w', comment:'The critical central break.' },
+      { san:'cxd4', color:'b', comment:'Trading the c-pawn for control of d4.' },
+      { san:'Nxd4', color:'w', comment:'White recaptures with the knight.' },
+      { san:'Nf6',  color:'b', comment:'Attacking e4, the most common Sicilian move.',
+        sidelines: [
+          { san:'g6', feedback:'The Dragon variation — leads to a very different pawn structure.' }
+        ] },
+      { san:'Nc3',  color:'w', comment:'White defends e4.' },
+      { san:'a6',   color:'b', comment:'The Najdorf move! Stops Bb5+ and prepares ...b5.' },
+      { san:'Be3',  color:'w', comment:'The English Attack.' },
+      { san:'e5',   color:'b', comment:'Kicking the d4 knight — a key Najdorf idea.',
+        sidelines: [
+          { san:'b5', feedback:'Also playable — ...b5 launches queenside counterplay immediately.' }
+        ] },
+      { san:'Nb3',  color:'w', comment:'The knight retreats.' },
+      { san:'Be6',  color:'b', comment:'Developing and eyeing the queenside.' },
+      { san:'f3',   color:'w', comment:'White reinforces the center.' },
+      { san:'Be7',  color:'b', comment:'Preparing to castle kingside.' },
+    ]
+  },
+
+  // ── FRENCH DEFENSE ────────────────────────────────────────────
+
+  'french-white': {
+    id: 'french-white', name: 'French Defense (Classical)', playerColor: 'w',
+    description: 'Black challenges the center with ...e6 and ...d5. White builds a strong center.',
+    moves: [
+      { san:'e4',   color:'w', comment:'Staking the center.' },
+      { san:'e6',   color:'b', comment:'The French Defense.' },
+      { san:'d4',   color:'w', comment:'Building the pawn center.',
+        sidelines: [
+          { san:'Nf3', feedback:"The King's Indian Attack — avoids French theory but less ambitious." }
+        ] },
+      { san:'d5',   color:'b', comment:'Challenging e4.' },
+      { san:'Nc3',  color:'w', comment:'The Classical variation — supporting e4.',
+        sidelines: [
+          { san:'e5', feedback:'Advance variation — grabs space but gives Black a clear plan with ...c5.' }
+        ] },
+      { san:'Nf6',  color:'b', comment:'Developing and pressuring e4.' },
+      { san:'Bg5',  color:'w', comment:'Pinning the knight — the Classical pin.' },
+      { san:'Be7',  color:'b', comment:'Breaking the pin.' },
+      { san:'e5',   color:'w', comment:'Gaining space — the position transforms into a blocked center.' },
+      { san:'Nfd7', color:'b', comment:'The knight retreats to support ...c5.' },
+      { san:'Bxe7', color:'w', comment:'Trading the bishop.' },
+      { san:'Qxe7', color:'b', comment:'Black recaptures.' },
+      { san:'f4',   color:'w', comment:'Supporting e5, preparing kingside attack.' },
+      { san:'a6',   color:'b', comment:'Preparing ...c5.' },
+      { san:'Nf3',  color:'w', comment:'Developing the knight.' },
+      { san:'c5',   color:'b', comment:'The key counterattack in the French.' },
+    ]
+  },
+
+  'french-black': {
+    id: 'french-black', name: 'French Defense — You play Black', playerColor: 'b',
+    description: 'A solid, strategic opening. Black accepts a slightly cramped position in exchange for a sound pawn structure.',
+    moves: [
+      { san:'e4',   color:'w', comment:'White stakes the center.' },
+      { san:'e6',   color:'b', comment:'The French — solid pawn structure, fighting for d5.' },
+      { san:'d4',   color:'w', comment:'White builds the center.' },
+      { san:'d5',   color:'b', comment:'Challenging the center immediately.',
+        sidelines: [
+          { san:'c5', feedback:'The Sicilian-French hybrid — less principled in the French setup.' }
+        ] },
+      { san:'Nc3',  color:'w', comment:'The Classical variation.' },
+      { san:'Nf6',  color:'b', comment:'Developing and attacking e4.',
+        sidelines: [
+          { san:'Bb4', feedback:'The Winawer variation — very sharp and double-edged.' }
+        ] },
+      { san:'Bg5',  color:'w', comment:'The Classical pin.' },
+      { san:'Be7',  color:'b', comment:'Breaking the pin, preparing to castle.' },
+      { san:'e5',   color:'w', comment:'White grabs space.' },
+      { san:'Nfd7', color:'b', comment:'The knight must move — heading for b6 or f8.' },
+      { san:'Bxe7', color:'w', comment:'White trades the bishop.' },
+      { san:'Qxe7', color:'b', comment:'Recapturing, eyeing the kingside.' },
+      { san:'f4',   color:'w', comment:'White supports e5.' },
+      { san:'a6',   color:'b', comment:'Preparing ...c5 — the key French counterattack.' },
+      { san:'Nf3',  color:'w', comment:'White develops.' },
+      { san:'c5',   color:'b', comment:'Striking the center — classic French counterplay.' },
+    ]
+  },
+
+  // ── QUEEN'S GAMBIT ────────────────────────────────────────────
+
+  'qgd-white': {
+    id: 'qgd-white', name: "Queen's Gambit", playerColor: 'w',
+    description: "One of the oldest and most respected openings. White offers a pawn to gain central control.",
+    moves: [
+      { san:'d4',   color:'w', comment:"The Queen's pawn opening." },
+      { san:'d5',   color:'b', comment:'Symmetrical response.' },
+      { san:'c4',   color:'w', comment:"The Queen's Gambit! Offering the c-pawn for central control." },
+      { san:'e6',   color:'b', comment:'The Orthodox Defense — solid and sound.',
+        sidelines: [
+          { san:'dxc4', feedback:"The Queen's Gambit Accepted — Black takes the pawn but cedes the center." }
+        ] },
+      { san:'Nc3',  color:'w', comment:'Developing and supporting d4.' },
+      { san:'Nf6',  color:'b', comment:'Black develops the knight.' },
+      { san:'Bg5',  color:'w', comment:'Pinning the knight — classical QGD approach.',
+        sidelines: [
+          { san:'Nf3', feedback:'The Catalan setup — playing g3 and Bg2 for long-term pressure.' }
+        ] },
+      { san:'Be7',  color:'b', comment:'Breaking the pin.' },
+      { san:'e3',   color:'w', comment:'Solid — preparing Bd3.' },
+      { san:'O-O',  color:'b', comment:'Castling to safety.' },
+      { san:'Nf3',  color:'w', comment:'Completing development.' },
+      { san:'Nbd7', color:'b', comment:'Developing the queenside knight.' },
+      { san:'Rc1',  color:'w', comment:'Rook to the semi-open file.' },
+      { san:'c6',   color:'b', comment:'Solidifying d5.' },
+      { san:'Bd3',  color:'w', comment:'Aiming at h7.' },
+      { san:'dxc4', color:'b', comment:'Finally accepting the gambit.' },
+      { san:'Bxc4', color:'w', comment:'Recapturing with development.' },
+    ]
+  },
+
+  'qgd-black': {
+    id: 'qgd-black', name: "Queen's Gambit Declined (Orthodox)", playerColor: 'b',
+    description: "A classical, solid defense. Black declines the gambit and builds a resilient pawn structure.",
+    moves: [
+      { san:'d4',   color:'w', comment:"White opens with the Queen's pawn." },
+      { san:'d5',   color:'b', comment:'Meeting d4 with d5 — classical approach.' },
+      { san:'c4',   color:'w', comment:"The Queen's Gambit." },
+      { san:'e6',   color:'b', comment:'The Orthodox QGD — solid and time-tested.',
+        sidelines: [
+          { san:'c6', feedback:'The Slav Defense — equally solid but different pawn structure.' }
+        ] },
+      { san:'Nc3',  color:'w', comment:'White develops.' },
+      { san:'Nf6',  color:'b', comment:'Developing toward the center.',
+        sidelines: [
+          { san:'c6', feedback:'Transposing to the Semi-Slav — very popular and theory-heavy.' }
+        ] },
+      { san:'Bg5',  color:'w', comment:'The Classical pin.' },
+      { san:'Be7',  color:'b', comment:'Breaking the pin, preparing to castle.' },
+      { san:'e3',   color:'w', comment:'White reinforces the center.' },
+      { san:'O-O',  color:'b', comment:'Castling — prioritizing king safety.' },
+      { san:'Nf3',  color:'w', comment:'White completes development.' },
+      { san:'Nbd7', color:'b', comment:'The standard QGD development — supporting e5 and c5 breaks.' },
+      { san:'Rc1',  color:'w', comment:'White plays the rook to the c-file.' },
+      { san:'c6',   color:'b', comment:'Solidifying d5 — a key QGD idea.' },
+      { san:'Bd3',  color:'w', comment:'White aims the bishop at h7.' },
+      { san:'dxc4', color:'b', comment:'The ...dxc4 freeing move — releasing the tension.' },
+      { san:'Bxc4', color:'w', comment:'White recaptures.' },
+      { san:'Nd5',  color:'b', comment:'Centralizing the knight — active play.' },
+    ]
   }
 
 };
@@ -652,6 +931,9 @@ let moveIdx        = 0;
 let isComplete     = false;
 let playedSANs     = [];
 let selectedSquare = null;
+let stats          = {};
+let sfWorker = null, sfReady = false, freePlayMode = false;
+let sfSkillLevel = 5, sfThinking = false;
 // API calls are proxied through /.netlify/functions/chat (key lives server-side)
 
 // ═══════════════════════════════════════════════════════════════
@@ -719,9 +1001,26 @@ function bindClickToMove() {
         const piece = board.position()[from] || null;
         onSquareClick(from, piece);
     });
+
+    el.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const t = e.touches[0];
+        downSquare = squareFromCoords(t.clientX, t.clientY);
+    }, { passive: false });
+
+    el.addEventListener('touchend', e => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        const upSquare = squareFromCoords(t.clientX, t.clientY);
+        if (!downSquare || upSquare !== downSquare) { downSquare = null; return; }
+        const from = downSquare;
+        downSquare = null;
+        onSquareClick(from, board.position()[from] || null);
+    }, { passive: false });
 }
 
 function onDragStart(source, piece) {
+    if (freePlayMode) return !sfThinking && !game.game_over();
     if (!opening || isComplete || game.game_over()) return false;
     if (game.turn() !== opening.playerColor) return false;
     if (opening.playerColor === 'w' && piece.startsWith('b')) return false;
@@ -730,6 +1029,7 @@ function onDragStart(source, piece) {
 }
 
 function onDrop(source, target) {
+    if (freePlayMode) return onDropFreePlay(source, target);
     clearHints();
 
     // Same-square drop = click-to-move selection toggle
@@ -780,6 +1080,7 @@ function onDrop(source, target) {
             setStatus('hint', `📖 ${move.san} — ${sideline.feedback}`);
         } else {
             setStatus('wrong', `✗  ${move.san} isn't the right move here. Think it through — or tap 💡 for a hint.`);
+            recordError(opening.id, moveIdx);
         }
         return 'snapback';
     }
@@ -824,6 +1125,9 @@ function loadOpening(id) {
     }
 
     addChat('system-msg', `Loaded: ${opening.name} (${opening.playerColor === 'w' ? 'White' : 'Black'}). Ask me anything!`);
+
+    recordSessionStart(opening.id);
+    updateWeakSpotsIndicator();
 }
 
 function playOpponentMove() {
@@ -850,6 +1154,7 @@ function completeOpening() {
     isComplete = true;
     updateProgress();
     setStatus('correct', '🎉  Line complete! Great work. Tap ↺ Restart to drill it again.');
+    recordCompletion(opening.id);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1054,6 +1359,210 @@ function addChat(role, text) {
     const c = document.getElementById('chatMessages');
     c.appendChild(div);
     c.scrollTop = c.scrollHeight;
+
+    // Update FAB badge when chat is not open on mobile
+    if (window.innerWidth <= 720 && !document.querySelector('.chat-section').classList.contains('open')) {
+        unreadChatCount++;
+        const badge = document.getElementById('fabBadge');
+        badge.textContent = unreadChatCount;
+        badge.style.display = 'flex';
+    }
+}
+
+let unreadChatCount = 0;
+
+function toggleChat() {
+    const chatSection = document.querySelector('.chat-section');
+    const isOpen = chatSection.classList.contains('open');
+    chatSection.classList.toggle('open');
+    if (!isOpen) {
+        // Opening the chat — reset badge
+        unreadChatCount = 0;
+        const badge = document.getElementById('fabBadge');
+        badge.style.display = 'none';
+        badge.textContent = '0';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPACED REPETITION
+// ═══════════════════════════════════════════════════════════════
+
+function loadStats() {
+    try { return JSON.parse(localStorage.getItem('chessTrainerStats') || '{}'); }
+    catch(e) { return {}; }
+}
+
+function saveStats() {
+    localStorage.setItem('chessTrainerStats', JSON.stringify(stats));
+}
+
+function recordSessionStart(openingId) {
+    if (!stats[openingId]) stats[openingId] = { sessions: 0, completions: 0, moveErrors: {}, lastPlayed: 0 };
+    stats[openingId].sessions++;
+    stats[openingId].lastPlayed = Date.now();
+    saveStats();
+}
+
+function recordError(openingId, moveIdx) {
+    if (!stats[openingId]) stats[openingId] = { sessions: 0, completions: 0, moveErrors: {}, lastPlayed: 0 };
+    const key = String(moveIdx);
+    stats[openingId].moveErrors[key] = (stats[openingId].moveErrors[key] || 0) + 1;
+    saveStats();
+}
+
+function recordCompletion(openingId) {
+    if (!stats[openingId]) stats[openingId] = { sessions: 0, completions: 0, moveErrors: {}, lastPlayed: 0 };
+    stats[openingId].completions++;
+    stats[openingId].lastPlayed = Date.now();
+    saveStats();
+}
+
+function getWeakMoveIndices(openingId) {
+    const s = stats[openingId];
+    if (!s || !s.moveErrors) return [];
+    return Object.keys(s.moveErrors)
+        .map(Number)
+        .sort((a, b) => a - b);
+}
+
+function updateWeakSpotsIndicator() {
+    const bar = document.getElementById('srBar');
+    if (!opening) { bar.style.display = 'none'; return; }
+    const weak = getWeakMoveIndices(opening.id);
+    if (weak.length === 0) { bar.style.display = 'none'; return; }
+    const totalErrors = Object.values(stats[opening.id].moveErrors).reduce((a,b) => a+b, 0);
+    document.getElementById('srBadge').textContent = `${weak.length} weak spot${weak.length > 1 ? 's' : ''} · ${totalErrors} error${totalErrors > 1 ? 's' : ''}`;
+    bar.style.display = 'flex';
+}
+
+function drillWeakMoves() {
+    if (!opening || !game) return;
+    const weak = getWeakMoveIndices(opening.id);
+    if (weak.length === 0) return;
+    const targetIdx = weak[0]; // earliest problem move
+    // Reset to start
+    game.reset();
+    moveIdx = 0;
+    playedSANs = [];
+    isComplete = false;
+    clearHints();
+    clearSelection();
+    // Replay moves silently up to (but not including) the target
+    while (moveIdx < targetIdx) {
+        const m = opening.moves[moveIdx];
+        game.move(m.san);
+        playedSANs.push({ san: m.san, color: m.color, comment: m.comment });
+        moveIdx++;
+    }
+    board.position(game.fen());
+    updateMoveLog();
+    updateProgress();
+    const moveNum = Math.floor(targetIdx / 2) + 1;
+    setStatus('info', `🎯 Drilling from move ${moveNum} — your most-missed position`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FREE PLAY vs STOCKFISH
+// ═══════════════════════════════════════════════════════════════
+
+async function initStockfish() {
+    if (sfWorker) return; // already loaded
+    try {
+        const resp = await fetch('https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js');
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        sfWorker = new Worker(url);
+        sfWorker.onmessage = handleStockfishMessage;
+        sfWorker.postMessage('uci');
+    } catch(e) {
+        setStatus('wrong', 'Failed to load Stockfish engine. Check your connection.');
+    }
+}
+
+function handleStockfishMessage(e) {
+    const line = e.data;
+    if (line === 'uciok') {
+        sfWorker.postMessage('isready');
+    } else if (line === 'readyok') {
+        sfReady = true;
+        setSkillLevel(sfSkillLevel);
+    } else if (line.startsWith('bestmove') && freePlayMode) {
+        sfThinking = false;
+        const parts = line.split(' ');
+        const moveStr = parts[1];
+        if (moveStr && moveStr !== '(none)') {
+            applyStockfishMove(moveStr);
+        }
+    }
+}
+
+function setSkillLevel(val) {
+    sfSkillLevel = parseInt(val);
+    document.getElementById('skillLabel').textContent = sfSkillLevel;
+    if (sfWorker && sfReady) {
+        sfWorker.postMessage(`setoption name Skill Level value ${Math.round(sfSkillLevel * 2)}`);
+    }
+}
+
+function askStockfish() {
+    if (!sfWorker || !sfReady || !freePlayMode) return;
+    sfThinking = true;
+    const fen = game.fen();
+    sfWorker.postMessage(`position fen ${fen}`);
+    sfWorker.postMessage('go movetime 1000');
+}
+
+function applyStockfishMove(uciMove) {
+    // UCI format: e2e4, e7e8q (promotion)
+    const from = uciMove.slice(0,2);
+    const to = uciMove.slice(2,4);
+    const promotion = uciMove.length > 4 ? uciMove[4] : undefined;
+    const move = game.move({ from, to, promotion });
+    if (!move) return;
+    board.position(game.fen());
+    updateMoveLog();
+    document.getElementById('fpStatus').textContent = game.game_over()
+        ? (game.in_checkmate() ? 'Checkmate!' : 'Game over — ' + (game.in_draw() ? 'Draw' : 'Stalemate'))
+        : "Your turn";
+}
+
+function onDropFreePlay(source, target) {
+    if (sfThinking || game.game_over()) return 'snapback';
+    const playerColor = board.orientation() === 'white' ? 'w' : 'b';
+    if (game.turn() !== playerColor) return 'snapback';
+    const move = game.move({ from: source, to: target, promotion: 'q' });
+    if (!move) return 'snapback';
+    updateMoveLog();
+    document.getElementById('fpStatus').textContent = 'Stockfish is thinking...';
+    setTimeout(askStockfish, 100);
+    return undefined;
+}
+
+function enterFreePlay() {
+    freePlayMode = true;
+    document.getElementById('freePlayBar').style.display = 'block';
+    document.getElementById('trainerControls').style.display = 'none';
+    document.getElementById('srBar').style.display = 'none';
+    document.getElementById('statusBox').style.display = 'none';
+    document.getElementById('fpStatus').textContent = 'Free play — you move first!';
+    // Reset board to current position (or start if no opening loaded)
+    if (!opening) {
+        game = game || new Chess();
+        game.reset();
+        board.position('start');
+        board.orientation('white');
+    }
+    updateMoveLog();
+    initStockfish();
+}
+
+function exitFreePlay() {
+    freePlayMode = false;
+    document.getElementById('freePlayBar').style.display = 'none';
+    document.getElementById('trainerControls').style.display = 'flex';
+    document.getElementById('statusBox').style.display = 'block';
+    if (opening) updateWeakSpotsIndicator();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1061,6 +1570,7 @@ function addChat(role, text) {
 // ═══════════════════════════════════════════════════════════════
 
 $(document).ready(function () {
+    stats = loadStats();
     initBoard();
 
     document.getElementById('openingSelect').addEventListener('change', function () {
