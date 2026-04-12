@@ -333,6 +333,138 @@
             }
             .chat-section.open { transform: translateY(0); }
         }
+
+        /* ── Auth & Stats UI ── */
+        .header-auth { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+        .auth-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .auth-btn:hover { background: rgba(233,69,96,0.15); }
+        .auth-btn.secondary { border-color: #555; color: var(--muted); }
+        .auth-btn.secondary:hover { background: rgba(255,255,255,0.05); }
+        .user-email { font-size: 12px; color: var(--muted); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .stats-link-btn { background: none; border: none; color: var(--gold); font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
+        .stats-link-btn:hover { background: rgba(245,166,35,0.1); }
+
+        /* ── Modal overlay ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            width: 340px;
+            max-width: 100%;
+            border: 1px solid #2a3a5a;
+            position: relative;
+        }
+        .modal-box h3 { color: var(--accent); margin-bottom: 16px; font-size: 16px; }
+        .modal-close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
+        .modal-close-btn:hover { color: var(--text); }
+        .modal-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+        .modal-tab { flex: 1; padding: 8px; background: var(--deep); border: none; color: var(--muted); border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .modal-tab.active { background: var(--accent); color: #fff; font-weight: 700; }
+        .modal-field { margin-bottom: 12px; }
+        .modal-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+        .modal-field input {
+            width: 100%;
+            background: var(--deep);
+            border: 1px solid #444;
+            color: var(--text);
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .modal-field input:focus { outline: none; border-color: var(--accent); }
+        .modal-error { color: var(--accent); font-size: 12px; margin-bottom: 10px; min-height: 16px; }
+        .modal-submit {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-migrate {
+            margin-top: 14px;
+            padding: 12px;
+            background: rgba(245,166,35,0.08);
+            border: 1px solid rgba(245,166,35,0.4);
+            border-radius: 8px;
+        }
+        .modal-migrate p { font-size: 12px; color: var(--gold); margin-bottom: 8px; line-height: 1.5; }
+        .modal-migrate-btns { display: flex; gap: 8px; }
+        .btn-migrate { background: var(--gold); color: #1a1a2e; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .btn-skip-migrate { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+        /* ── Stats modal ── */
+        .stats-modal-box {
+            width: 520px;
+            max-width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .stats-modal-box h3 { margin-bottom: 4px; }
+        .stats-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+        .stats-content { overflow-y: auto; flex: 1; padding-right: 4px; }
+        .stats-section { margin-bottom: 22px; }
+        .stats-section h4 {
+            font-size: 11px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--deep);
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 13px;
+        }
+        .stats-row:last-child { border-bottom: none; }
+        .stats-row-label { color: var(--text); }
+        .stats-row-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+        .stats-count { color: var(--accent); font-weight: 700; font-size: 15px; min-width: 30px; text-align: right; }
+        .stats-empty { color: var(--muted); font-size: 13px; font-style: italic; padding: 6px 0; }
+        .stats-opening-group { margin-bottom: 12px; }
+        .stats-opening-group-name { font-size: 12px; color: var(--gold); font-weight: 600; margin-bottom: 3px; }
+        .stats-mistake-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0 4px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-size: 12px;
+            color: #ccc;
+        }
+        .stats-mistake-item:last-child { border-bottom: none; }
+        .stats-loading { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0; }
     </style>
 </head>
 <body>
@@ -343,6 +475,7 @@
     <h1>♟ Opening Trainer</h1>
     <select class="opening-select" id="openingSelect">
         <option value="">— Pick an opening —</option>
+<!-- auth controls injected after select via JS -->
         <optgroup label="London System">
             <option value="london-white">London System — You play White ♙</option>
             <option value="london-black">London System — You play Black ♟</option>
@@ -376,6 +509,18 @@
             <option value="qgd-black">QGD — You play Black ♟</option>
         </optgroup>
     </select>
+    <div class="header-auth" id="headerAuth">
+        <!-- Signed-out state -->
+        <div id="authSignedOut">
+            <button class="auth-btn" onclick="openAuthModal('signin')">Sign In</button>
+        </div>
+        <!-- Signed-in state (hidden until auth) -->
+        <div id="authSignedIn" style="display:none; align-items:center; gap:8px;">
+            <button class="stats-link-btn" onclick="openStatsModal()">📊 My Stats</button>
+            <span class="user-email" id="userEmailDisplay"></span>
+            <button class="auth-btn secondary" onclick="signOut()">Sign Out</button>
+        </div>
+    </div>
 </div>
 
 <div class="main">
@@ -435,12 +580,383 @@
     </div>
 </div>
 
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+        <button class="modal-close-btn" onclick="closeAuthModal()">×</button>
+        <h3>Account</h3>
+        <div class="modal-tabs">
+            <button class="modal-tab active" id="tabSignIn" onclick="switchAuthTab('signin')">Sign In</button>
+            <button class="modal-tab" id="tabSignUp" onclick="switchAuthTab('signup')">Create Account</button>
+        </div>
+        <div class="modal-field">
+            <label for="authEmail">Email</label>
+            <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="modal-field">
+            <label for="authPassword">Password</label>
+            <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="modal-error" id="authError"></div>
+        <button class="modal-submit" id="authSubmitBtn" onclick="submitAuth()">Sign In</button>
+        <div class="modal-migrate" id="migratePrompt" style="display:none">
+            <p>You have local training data (stats from this browser). Upload it to your account so it's saved in the cloud?</p>
+            <div class="modal-migrate-btns">
+                <button class="btn-migrate" onclick="doMigrate()">Yes, upload my data</button>
+                <button class="btn-skip-migrate" onclick="skipMigrate()">Skip</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Modal -->
+<div class="modal-overlay" id="statsModal">
+    <div class="modal-box stats-modal-box">
+        <button class="modal-close-btn" onclick="closeStatsModal()">×</button>
+        <h3>📊 My Stats</h3>
+        <p class="stats-subtitle" id="statsSubtitle">Loading…</p>
+        <div class="stats-content" id="statsContent">
+            <div class="stats-loading">Loading your stats…</div>
+        </div>
+    </div>
+</div>
+
 <!-- Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// Fill in your values after creating a Supabase project.
+// Dashboard → your project → Settings → API
+// ═══════════════════════════════════════════════════════════════
+
+const SUPABASE_URL     = 'https://mzxfrzgndgojddfnpqsv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16eGZyemduZGdvamRkZm5wcXN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NDA4OTksImV4cCI6MjA5MTUxNjg5OX0.BQlPKBR4w6EJZ5j39Gs9GrdbsBQnJc92FbAU4sdyKd8';
+
+let supabaseClient = null;
+let currentUser    = null;
+let authTab        = 'signin';
+
+function supabaseConfigured() {
+    return SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+}
+
+function initSupabase() {
+    if (!supabaseConfigured()) return;
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        currentUser = session?.user ?? null;
+        updateAuthUI();
+        if (event === 'SIGNED_IN') {
+            closeAuthModal();
+            const hasLocalData = Object.keys(stats).length > 0;
+            if (hasLocalData) {
+                document.getElementById('migratePrompt').style.display = 'block';
+                openAuthModal('migrate');
+            }
+        }
+    });
+
+    // Restore existing session
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        currentUser = session?.user ?? null;
+        updateAuthUI();
+    });
+}
+
+// ─── Auth UI ────────────────────────────────────────────────────
+
+function updateAuthUI() {
+    const signedOut = document.getElementById('authSignedOut');
+    const signedIn  = document.getElementById('authSignedIn');
+    if (currentUser) {
+        signedOut.style.display = 'none';
+        signedIn.style.display = 'flex';
+        document.getElementById('userEmailDisplay').textContent = currentUser.email;
+    } else {
+        signedOut.style.display = 'block';
+        signedIn.style.display = 'none';
+    }
+}
+
+function openAuthModal(mode) {
+    if (mode === 'migrate') {
+        // Just show the migrate prompt inside the already-closed auth modal
+        document.getElementById('authModal').classList.add('open');
+        document.getElementById('authError').textContent = '';
+        document.getElementById('authEmail').value = '';
+        document.getElementById('authPassword').value = '';
+        document.querySelector('.modal-tabs').style.display = 'none';
+        document.querySelector('.modal-field').style.display = 'none';
+        document.querySelectorAll('.modal-field')[1].style.display = 'none';
+        document.getElementById('authSubmitBtn').style.display = 'none';
+        document.querySelector('.modal-box h3').textContent = 'Sync Local Data?';
+        document.getElementById('migratePrompt').style.display = 'block';
+        return;
+    }
+    // Reset modal to normal auth form
+    document.querySelector('.modal-tabs').style.display = 'flex';
+    document.querySelectorAll('.modal-field').forEach(f => f.style.display = 'block');
+    document.getElementById('authSubmitBtn').style.display = 'block';
+    document.querySelector('.modal-box h3').textContent = 'Account';
+    document.getElementById('migratePrompt').style.display = 'none';
+
+    switchAuthTab(mode || 'signin');
+    document.getElementById('authError').textContent = '';
+    document.getElementById('authModal').classList.add('open');
+    setTimeout(() => document.getElementById('authEmail').focus(), 100);
+}
+
+function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('open');
+}
+
+function switchAuthTab(tab) {
+    authTab = tab;
+    document.getElementById('tabSignIn').classList.toggle('active', tab === 'signin');
+    document.getElementById('tabSignUp').classList.toggle('active', tab === 'signup');
+    document.getElementById('authSubmitBtn').textContent = tab === 'signin' ? 'Sign In' : 'Create Account';
+    document.getElementById('authPassword').autocomplete = tab === 'signin' ? 'current-password' : 'new-password';
+    document.getElementById('authError').textContent = '';
+}
+
+async function submitAuth() {
+    if (!supabaseClient) {
+        document.getElementById('authError').textContent = 'Supabase is not configured yet. See SUPABASE_SETUP.md.';
+        return;
+    }
+    const email    = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const btn      = document.getElementById('authSubmitBtn');
+    const errEl    = document.getElementById('authError');
+
+    if (!email || !password) { errEl.textContent = 'Please enter email and password.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = authTab === 'signin' ? 'Signing in…' : 'Creating account…';
+    errEl.textContent = '';
+
+    const { error } = authTab === 'signin'
+        ? await supabaseClient.auth.signInWithPassword({ email, password })
+        : await supabaseClient.auth.signUp({ email, password });
+
+    btn.disabled = false;
+    btn.textContent = authTab === 'signin' ? 'Sign In' : 'Create Account';
+
+    if (error) {
+        errEl.textContent = error.message;
+    } else if (authTab === 'signup') {
+        errEl.style.color = 'var(--green)';
+        errEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+        errEl.style.color = '';
+    }
+}
+
+async function signOut() {
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    currentUser = null;
+    updateAuthUI();
+}
+
+// ─── Data migration ──────────────────────────────────────────────
+
+async function doMigrate() {
+    document.getElementById('migratePrompt').innerHTML = '<p style="color:var(--muted)">Uploading…</p>';
+    await migrateLocalStorageToSupabase();
+    closeAuthModal();
+    // Restore modal structure for future use
+    document.getElementById('migratePrompt').innerHTML = `
+        <p>You have local training data (stats from this browser). Upload it to your account so it's saved in the cloud?</p>
+        <div class="modal-migrate-btns">
+            <button class="btn-migrate" onclick="doMigrate()">Yes, upload my data</button>
+            <button class="btn-skip-migrate" onclick="skipMigrate()">Skip</button>
+        </div>`;
+}
+
+function skipMigrate() {
+    closeAuthModal();
+}
+
+async function migrateLocalStorageToSupabase() {
+    if (!supabaseClient || !currentUser) return;
+    for (const [openingId, s] of Object.entries(stats)) {
+        await syncOpeningToSupabase(openingId);
+        if (s.moveErrors) {
+            for (const moveIdxStr of Object.keys(s.moveErrors)) {
+                await syncMistakeToSupabase(openingId, parseInt(moveIdxStr));
+            }
+        }
+    }
+}
+
+// ─── Supabase sync helpers ───────────────────────────────────────
+
+async function syncOpeningToSupabase(openingId) {
+    if (!supabaseClient || !currentUser) return;
+    const s  = stats[openingId];
+    if (!s) return;
+    const op = OPENINGS[openingId];
+    await supabaseClient.from('opening_plays').upsert({
+        user_id:          currentUser.id,
+        opening_id:       openingId,
+        opening_name:     op ? op.name : openingId,
+        play_count:       s.sessions    || 0,
+        completion_count: s.completions || 0,
+        last_played_at:   s.lastPlayed ? new Date(s.lastPlayed).toISOString() : new Date().toISOString()
+    }, { onConflict: 'user_id,opening_id' });
+}
+
+async function syncMistakeToSupabase(openingId, moveIndex) {
+    if (!supabaseClient || !currentUser) return;
+    const s = stats[openingId];
+    if (!s || !s.moveErrors) return;
+    const count   = s.moveErrors[String(moveIndex)] || 0;
+    const op      = OPENINGS[openingId];
+    const moveSan = op && op.moves[moveIndex] ? op.moves[moveIndex].san : String(moveIndex);
+    await supabaseClient.from('mistakes').upsert({
+        user_id:      currentUser.id,
+        opening_id:   openingId,
+        opening_name: op ? op.name : openingId,
+        move_index:   moveIndex,
+        move_san:     moveSan,
+        count:        count,
+        last_seen_at: new Date().toISOString()
+    }, { onConflict: 'user_id,opening_id,move_index' });
+}
+
+// ─── Stats modal ─────────────────────────────────────────────────
+
+async function openStatsModal() {
+    document.getElementById('statsModal').classList.add('open');
+    document.getElementById('statsContent').innerHTML = '<div class="stats-loading">Loading…</div>';
+    document.getElementById('statsSubtitle').textContent =
+        currentUser ? `Signed in as ${currentUser.email}` : 'Local data (sign in to sync)';
+
+    let plays, mistakes;
+
+    if (supabaseClient && currentUser) {
+        const [{ data: p }, { data: m }] = await Promise.all([
+            supabaseClient.from('opening_plays').select('*').eq('user_id', currentUser.id).order('play_count', { ascending: false }),
+            supabaseClient.from('mistakes').select('*').eq('user_id', currentUser.id).order('count', { ascending: false })
+        ]);
+        plays    = p || [];
+        mistakes = m || [];
+    } else {
+        // Build from localStorage stats
+        plays = Object.entries(stats).map(([id, s]) => ({
+            opening_id:       id,
+            opening_name:     OPENINGS[id]?.name || id,
+            play_count:       s.sessions    || 0,
+            completion_count: s.completions || 0
+        })).sort((a, b) => b.play_count - a.play_count);
+
+        mistakes = [];
+        for (const [id, s] of Object.entries(stats)) {
+            if (!s.moveErrors) continue;
+            for (const [idx, count] of Object.entries(s.moveErrors)) {
+                const moveSan = OPENINGS[id]?.moves[parseInt(idx)]?.san || idx;
+                mistakes.push({
+                    opening_id:   id,
+                    opening_name: OPENINGS[id]?.name || id,
+                    move_index:   parseInt(idx),
+                    move_san:     moveSan,
+                    count
+                });
+            }
+        }
+        mistakes.sort((a, b) => b.count - a.count);
+    }
+
+    renderStats(plays, mistakes);
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').classList.remove('open');
+}
+
+function renderStats(plays, mistakes) {
+    let html = '';
+
+    // ── Openings played ──────────────────────────────────────────
+    html += '<div class="stats-section">';
+    html += '<h4>Openings Played</h4>';
+    if (!plays.length) {
+        html += '<div class="stats-empty">No openings played yet.</div>';
+    } else {
+        plays.forEach(p => {
+            html += `<div class="stats-row">
+                <div>
+                    <div class="stats-row-label">${escHtml(p.opening_name)}</div>
+                    <div class="stats-row-sub">${p.completion_count || 0} completion${(p.completion_count||0) !== 1 ? 's' : ''}</div>
+                </div>
+                <div class="stats-count">${p.play_count}</div>
+            </div>`;
+        });
+    }
+    html += '</div>';
+
+    // ── Most common mistakes ─────────────────────────────────────
+    html += '<div class="stats-section">';
+    html += '<h4>Most Common Mistakes</h4>';
+    if (!mistakes.length) {
+        html += '<div class="stats-empty">No mistakes recorded yet — great work!</div>';
+    } else {
+        mistakes.slice(0, 10).forEach(m => {
+            html += `<div class="stats-row">
+                <div>
+                    <div class="stats-row-label">${escHtml(m.move_san)}</div>
+                    <div class="stats-row-sub">${escHtml(m.opening_name)}</div>
+                </div>
+                <div class="stats-count">${m.count}</div>
+            </div>`;
+        });
+    }
+    html += '</div>';
+
+    // ── Mistakes per opening ─────────────────────────────────────
+    html += '<div class="stats-section">';
+    html += '<h4>Mistakes by Opening</h4>';
+    const byOpening = {};
+    mistakes.forEach(m => {
+        if (!byOpening[m.opening_id]) byOpening[m.opening_id] = { name: m.opening_name, items: [] };
+        byOpening[m.opening_id].items.push(m);
+    });
+    const openingGroups = Object.values(byOpening);
+    if (!openingGroups.length) {
+        html += '<div class="stats-empty">Nothing here yet.</div>';
+    } else {
+        openingGroups.forEach(g => {
+            html += `<div class="stats-opening-group">
+                <div class="stats-opening-group-name">${escHtml(g.name)}</div>`;
+            g.items.forEach(m => {
+                html += `<div class="stats-mistake-item">
+                    <span>${escHtml(m.move_san)}</span>
+                    <span style="color:var(--accent);font-weight:700">${m.count}×</span>
+                </div>`;
+            });
+            html += '</div>';
+        });
+    }
+    html += '</div>';
+
+    document.getElementById('statsContent').innerHTML = html;
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Close modals on overlay click
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'authModal')  closeAuthModal();
+    if (e.target.id === 'statsModal') closeStatsModal();
+});
+
 // ═══════════════════════════════════════════════════════════════
 // OPENING DATA — 6 openings, all verified legal
 // ═══════════════════════════════════════════════════════════════
@@ -1467,13 +1983,15 @@ function recordSessionStart(openingId) {
     stats[openingId].sessions++;
     stats[openingId].lastPlayed = Date.now();
     saveStats();
+    syncOpeningToSupabase(openingId);
 }
 
-function recordError(openingId, moveIdx) {
+function recordError(openingId, moveIndex) {
     if (!stats[openingId]) stats[openingId] = { sessions: 0, completions: 0, moveErrors: {}, lastPlayed: 0 };
-    const key = String(moveIdx);
+    const key = String(moveIndex);
     stats[openingId].moveErrors[key] = (stats[openingId].moveErrors[key] || 0) + 1;
     saveStats();
+    syncMistakeToSupabase(openingId, moveIndex);
 }
 
 function recordCompletion(openingId) {
@@ -1481,6 +1999,7 @@ function recordCompletion(openingId) {
     stats[openingId].completions++;
     stats[openingId].lastPlayed = Date.now();
     saveStats();
+    syncOpeningToSupabase(openingId);
 }
 
 function getWeakMoveIndices(openingId) {
@@ -1637,6 +2156,7 @@ function exitFreePlay() {
 $(document).ready(function () {
     stats = loadStats();
     initBoard();
+    initSupabase();
 
     document.getElementById('openingSelect').addEventListener('change', function () {
         const val = this.value;
