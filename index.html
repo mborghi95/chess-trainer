@@ -465,6 +465,174 @@
         }
         .stats-mistake-item:last-child { border-bottom: none; }
         .stats-loading { color: var(--muted); font-size: 13px; text-align: center; padding: 20px 0; }
+
+        /* ── Review Game Modal ── */
+        .review-modal-box {
+            width: 580px;
+            max-width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .review-step { display: none; }
+        .review-step.active { display: block; }
+
+        /* Step 1 — paste */
+        .review-pgn-input {
+            width: 100%;
+            background: var(--deep);
+            border: 1px solid #444;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            resize: vertical;
+            min-height: 140px;
+            line-height: 1.5;
+        }
+        .review-pgn-input:focus { outline: none; border-color: var(--accent); }
+        .review-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
+        .review-analyse-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 11px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .review-analyse-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .review-error { color: var(--accent); font-size: 12px; margin-top: 8px; min-height: 16px; }
+
+        /* Step 2 — color picker */
+        .review-color-header { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+        .review-color-btns { display: flex; gap: 10px; }
+        .review-color-btn {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #444;
+            border-radius: 10px;
+            background: var(--deep);
+            color: var(--text);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+        }
+        .review-color-btn:hover { border-color: var(--accent); }
+
+        /* Step 3 — results */
+        .review-results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .review-back-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .review-results-content { overflow-y: auto; flex: 1; padding-right: 2px; }
+        .review-analysis-card {
+            background: rgba(233,69,96,0.07);
+            border: 1px solid rgba(233,69,96,0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+        }
+        .review-analysis-card h4 {
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 8px;
+        }
+        .review-analysis-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        .review-analysis-item:last-child { border-bottom: none; }
+        .review-analysis-item:hover { background: rgba(255,255,255,0.03); border-radius: 4px; }
+        .review-analysis-badge {
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .review-analysis-text { flex: 1; }
+        .review-analysis-move { font-size: 13px; color: var(--text); font-weight: 600; }
+        .review-analysis-explanation { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+        .review-drill-from-btn {
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* Move list */
+        .review-movelist-label {
+            font-size: 11px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--deep);
+        }
+        .review-move-pair {
+            display: grid;
+            grid-template-columns: 28px 1fr 1fr;
+            gap: 2px 6px;
+            align-items: start;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .review-move-pair:last-child { border-bottom: none; }
+        .review-move-num { font-size: 11px; color: #555; font-family: monospace; padding-top: 4px; }
+        .review-move-cell {
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.1s;
+            position: relative;
+        }
+        .review-move-cell:hover { background: rgba(255,255,255,0.07); }
+        .review-move-cell.player-move { color: var(--gold); font-weight: 700; }
+        .review-move-cell.opp-move    { color: #ccc; }
+        .review-move-cell.key-mistake   { background: rgba(233,69,96,0.12); border-left: 2px solid var(--accent); }
+        .review-move-cell.key-tactic    { background: rgba(245,166,35,0.12); border-left: 2px solid var(--gold); }
+        .review-move-cell.key-moment    { background: rgba(52,152,219,0.12); border-left: 2px solid #3498db; }
+        .review-move-annotation {
+            grid-column: 1 / -1;
+            font-size: 11px;
+            font-style: italic;
+            color: var(--muted);
+            padding: 2px 6px 4px 34px;
+            line-height: 1.4;
+        }
+
+        /* Drill bar */
+        #reviewDrillBar { margin-top: 10px; }
+        #reviewDrillStatus { font-size: 13px; color: var(--gold); font-weight: 600; margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -510,6 +678,7 @@
         </optgroup>
     </select>
     <div class="header-auth" id="headerAuth">
+        <button class="auth-btn" style="border-color:#3498db;color:#3498db" onclick="openReviewModal()">🔍 Review Game</button>
         <!-- Signed-out state -->
         <div id="authSignedOut">
             <button class="auth-btn" onclick="openAuthModal('signin')">Sign In</button>
@@ -543,6 +712,17 @@
                 </label>
             </div>
             <div id="fpStatus">Free play — you move first!</div>
+        </div>
+
+        <div id="reviewDrillBar" style="display:none">
+            <div class="fp-controls">
+                <button class="btn-fp-exit" onclick="exitReviewDrill()">← Back to Analysis</button>
+                <label class="fp-label">Difficulty: <span id="reviewSkillLabel">5</span>
+                    <input type="range" id="reviewSkillSlider" min="1" max="10" value="5"
+                           oninput="setSkillLevel(this.value); document.getElementById('reviewSkillLabel').textContent=this.value">
+                </label>
+            </div>
+            <div id="reviewDrillStatus"></div>
         </div>
 
         <div class="sr-bar" id="srBar" style="display:none">
@@ -617,6 +797,41 @@
         <p class="stats-subtitle" id="statsSubtitle">Loading…</p>
         <div class="stats-content" id="statsContent">
             <div class="stats-loading">Loading your stats…</div>
+        </div>
+    </div>
+</div>
+
+<!-- Review Game Modal -->
+<div class="modal-overlay" id="reviewModal">
+    <div class="modal-box review-modal-box">
+        <button class="modal-close-btn" onclick="closeReviewModal()">×</button>
+        <h3 id="reviewModalTitle">🔍 Review a Game</h3>
+
+        <!-- Step 1: Paste PGN -->
+        <div class="review-step active" id="reviewStep1">
+            <p class="review-hint" style="margin-bottom:8px">Paste a full game from chess.com or lichess (PGN format).</p>
+            <textarea class="review-pgn-input" id="reviewPgnInput"
+                placeholder="[Event &quot;Live Chess&quot;]&#10;[White &quot;yourname&quot;]&#10;[Black &quot;opponent&quot;]&#10;...&#10;1. e4 e5 2. Nf3 Nc6 ..."></textarea>
+            <div class="review-error" id="reviewError"></div>
+            <button class="review-analyse-btn" id="reviewAnalyseBtn" onclick="analyseGame()">Analyse with Claude ✨</button>
+        </div>
+
+        <!-- Step 2: Color picker -->
+        <div class="review-step" id="reviewStep2">
+            <p class="review-color-header" id="reviewColorHeader">Which side did you play?</p>
+            <div class="review-color-btns">
+                <button class="review-color-btn" onclick="setReviewColor('w')">♙ White</button>
+                <button class="review-color-btn" onclick="setReviewColor('b')">♟ Black</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Results -->
+        <div class="review-step" id="reviewStep3" style="display:flex;flex-direction:column;flex:1;min-height:0">
+            <div class="review-results-header">
+                <span id="reviewResultsInfo" style="font-size:12px;color:var(--muted)"></span>
+                <button class="review-back-btn" onclick="showReviewStep(1)">← Paste another game</button>
+            </div>
+            <div class="review-results-content" id="reviewResultsContent"></div>
         </div>
     </div>
 </div>
@@ -1460,6 +1675,14 @@ let selectedSquare = null;
 let stats          = {};
 let sfWorker = null, sfReady = false, freePlayMode = false;
 let sfSkillLevel = 5, sfThinking = false;
+
+// Review Game state
+let reviewFENs        = [];    // FEN at each half-move (index 0 = starting position)
+let reviewMoves       = [];    // verbose move objects from chess.js history()
+let reviewPlayerColor = null;  // 'w' or 'b'
+let reviewAnalysis    = [];    // [{halfMoveIndex, moveNumber, san, color, type, explanation}]
+let reviewDrillMode   = false; // true while drilling from a reviewed game
+let reviewPgnHeaders  = {};    // PGN headers from parsed game
 // API calls are proxied through /.netlify/functions/chat (key lives server-side)
 
 // ═══════════════════════════════════════════════════════════════
@@ -2106,9 +2329,14 @@ function applyStockfishMove(uciMove) {
     if (!move) return;
     board.position(game.fen());
     updateMoveLog();
-    document.getElementById('fpStatus').textContent = game.game_over()
+    const statusMsg = game.game_over()
         ? (game.in_checkmate() ? 'Checkmate!' : 'Game over — ' + (game.in_draw() ? 'Draw' : 'Stalemate'))
-        : "Your turn";
+        : 'Your turn';
+    if (reviewDrillMode) {
+        document.getElementById('reviewDrillStatus').textContent = statusMsg;
+    } else {
+        document.getElementById('fpStatus').textContent = statusMsg;
+    }
 }
 
 function onDropFreePlay(source, target) {
@@ -2148,6 +2376,305 @@ function exitFreePlay() {
     document.getElementById('statusBox').style.display = 'block';
     if (opening) updateWeakSpotsIndicator();
 }
+
+// ═══════════════════════════════════════════════════════════════
+// REVIEW A GAME
+// ═══════════════════════════════════════════════════════════════
+
+function openReviewModal(step) {
+    document.getElementById('reviewModal').classList.add('open');
+    showReviewStep(step || 1);
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.remove('open');
+}
+
+function showReviewStep(n) {
+    document.querySelectorAll('.review-step').forEach(el => el.classList.remove('active'));
+    const step = document.getElementById('reviewStep' + n);
+    if (step) step.classList.add('active');
+    const titles = { 1: '🔍 Review a Game', 2: '🔍 Review a Game', 3: '🔍 Analysis Results' };
+    document.getElementById('reviewModalTitle').textContent = titles[n] || '🔍 Review a Game';
+    if (n === 1) {
+        document.getElementById('reviewError').textContent = '';
+        document.getElementById('reviewAnalyseBtn').disabled = false;
+        document.getElementById('reviewAnalyseBtn').textContent = 'Analyse with Claude ✨';
+    }
+}
+
+function showReviewError(msg) {
+    document.getElementById('reviewError').textContent = msg;
+    document.getElementById('reviewAnalyseBtn').disabled = false;
+    document.getElementById('reviewAnalyseBtn').textContent = 'Analyse with Claude ✨';
+}
+
+async function analyseGame() {
+    const pgn = document.getElementById('reviewPgnInput').value.trim();
+    if (!pgn) { showReviewError('Please paste a game first.'); return; }
+
+    const btn = document.getElementById('reviewAnalyseBtn');
+    btn.disabled = true;
+    btn.textContent = 'Parsing…';
+    document.getElementById('reviewError').textContent = '';
+
+    // Parse with chess.js
+    const tempGame = new Chess();
+    const loaded = tempGame.load_pgn(pgn);
+    if (!loaded) {
+        showReviewError('Could not parse PGN — paste the full game text from chess.com or lichess.');
+        return;
+    }
+
+    // Build FEN array by replaying the game
+    const tempGame2 = new Chess();
+    reviewFENs = [tempGame2.fen()]; // index 0 = starting position (before move 1)
+    const verboseMoves = tempGame.history({ verbose: true });
+    verboseMoves.forEach(m => {
+        tempGame2.move({ from: m.from, to: m.to, promotion: m.promotion });
+        reviewFENs.push(tempGame2.fen());
+    });
+
+    reviewMoves = verboseMoves;
+    reviewPgnHeaders = tempGame.header() || {};
+
+    // Detect player color
+    reviewPlayerColor = detectPlayerColor(reviewPgnHeaders);
+
+    if (!reviewPlayerColor) {
+        // Show color picker
+        const w = reviewPgnHeaders.White || 'White';
+        const b = reviewPgnHeaders.Black || 'Black';
+        document.getElementById('reviewColorHeader').textContent =
+            `White: ${w}  ·  Black: ${b}\n\nWhich side did you play?`;
+        btn.disabled = false;
+        btn.textContent = 'Analyse with Claude ✨';
+        showReviewStep(2);
+    } else {
+        btn.textContent = 'Asking Claude…';
+        await fetchGameAnalysis();
+    }
+}
+
+function detectPlayerColor(headers) {
+    // Try to match Supabase username against PGN player names
+    const userEmail = currentUser?.email?.toLowerCase() || '';
+    const username  = userEmail.split('@')[0];
+    const white = (headers.White || '').toLowerCase();
+    const black = (headers.Black || '').toLowerCase();
+    if (username && white.includes(username)) return 'w';
+    if (username && black.includes(username)) return 'b';
+    // If only one player looks like a real name vs "?" skip auto-detect
+    return null;
+}
+
+function setReviewColor(color) {
+    reviewPlayerColor = color;
+    document.getElementById('reviewAnalyseBtn').textContent = 'Asking Claude…';
+    document.getElementById('reviewAnalyseBtn').disabled = true;
+    showReviewStep(1); // briefly — we'll jump to step 3 after fetch
+    fetchGameAnalysis();
+}
+
+async function fetchGameAnalysis() {
+    const side = reviewPlayerColor === 'w' ? 'White' : 'Black';
+    const pgn  = document.getElementById('reviewPgnInput').value.trim();
+
+    const systemPrompt = `You are a chess coach analysing a game. The user played as ${side}.
+
+Identify the 3 to 5 most critical moments in the game — significant mistakes, missed tactics, or key strategic decision points made by the user (${side}).
+
+Respond ONLY with a valid JSON array, absolutely no prose or markdown, in this exact format:
+[
+  {
+    "halfMoveIndex": 12,
+    "moveNumber": 7,
+    "san": "Nf3",
+    "color": "w",
+    "type": "mistake",
+    "explanation": "This allows Black to win a pawn immediately with Bxf3 followed by Nxe4."
+  }
+]
+
+Rules:
+- halfMoveIndex is 1-based: move 1 by White = 1, move 1 by Black = 2, move 2 by White = 3, etc.
+- type must be exactly one of: "mistake", "missed_tactic", "key_moment"
+- Focus on the user's moves (${side}), not the opponent's
+- explanation must be 1–2 sentences, plain English, beginner-friendly
+- Return between 3 and 5 items`;
+
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+                model:      'claude-haiku-4-5-20251001',
+                max_tokens: 800,
+                system:     systemPrompt,
+                messages:   [{ role: 'user', content: pgn }]
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const rawText = data.content[0].text.trim();
+
+        // Strip possible markdown fences
+        const jsonText = rawText.replace(/^```[a-z]*\n?/i, '').replace(/```$/,'').trim();
+        reviewAnalysis = JSON.parse(jsonText);
+
+    } catch(err) {
+        console.error('Game analysis error:', err);
+        reviewAnalysis = []; // Gracefully continue with empty analysis
+    }
+
+    renderReviewResults();
+}
+
+function renderReviewResults() {
+    const totalMoves = Math.ceil(reviewMoves.length / 2);
+    const side = reviewPlayerColor === 'w' ? 'White ♙' : 'Black ♟';
+    document.getElementById('reviewResultsInfo').textContent =
+        `You played ${side}  ·  ${totalMoves} move${totalMoves !== 1 ? 's' : ''}`;
+
+    // Build a lookup of halfMoveIndex → analysis item for quick highlighting
+    const analysisMap = {};
+    reviewAnalysis.forEach(a => { analysisMap[a.halfMoveIndex] = a; });
+
+    const typeBadge = { mistake: '🔴', missed_tactic: '🟡', key_moment: '🔵' };
+    const typeLabel = { mistake: 'Mistake', missed_tactic: 'Missed tactic', key_moment: 'Key moment' };
+    const typeCls   = { mistake: 'key-mistake', missed_tactic: 'key-tactic', key_moment: 'key-moment' };
+
+    let html = '';
+
+    // ── Analysis summary card ─────────────────────────────────
+    if (reviewAnalysis.length > 0) {
+        html += '<div class="review-analysis-card">';
+        html += '<h4>Claude\'s Key Moments</h4>';
+        reviewAnalysis.forEach(a => {
+            const badge = typeBadge[a.type] || '🔵';
+            const label = typeLabel[a.type] || 'Key moment';
+            const prefix = a.color === 'w' ? `${a.moveNumber}.` : `${a.moveNumber}…`;
+            html += `<div class="review-analysis-item" onclick="drillFromMove(${a.halfMoveIndex})">
+                <span class="review-analysis-badge">${badge}</span>
+                <div class="review-analysis-text">
+                    <div class="review-analysis-move">${prefix} ${escHtml(a.san)} <span style="font-size:11px;color:var(--muted);font-weight:400">${label}</span></div>
+                    <div class="review-analysis-explanation">${escHtml(a.explanation)}</div>
+                </div>
+                <button class="review-drill-from-btn">Drill →</button>
+            </div>`;
+        });
+        html += '</div>';
+    } else {
+        html += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-style:italic">Analysis unavailable — click any move below to drill from that position.</p>';
+    }
+
+    // ── Full move list ─────────────────────────────────────────
+    html += '<div class="review-movelist-label">Full Game — click any move to drill from there</div>';
+
+    // Group into pairs
+    let i = 0;
+    let moveNum = 1;
+    while (i < reviewMoves.length) {
+        const wMove  = reviewMoves[i];       // white move (halfMoveIndex = i+1)
+        const bMove  = reviewMoves[i + 1];   // black move (halfMoveIndex = i+2), may be undefined
+
+        const wIdx   = i + 1;
+        const bIdx   = i + 2;
+        const wData  = analysisMap[wIdx];
+        const bData  = analysisMap[bIdx];
+
+        const wIsPlayer = reviewPlayerColor === 'w';
+        const bIsPlayer = reviewPlayerColor === 'b';
+
+        const wCls = (wIsPlayer ? 'player-move' : 'opp-move') + (wData ? ' ' + typeCls[wData.type] : '');
+        const bCls = (bIsPlayer ? 'player-move' : 'opp-move') + (bData ? ' ' + typeCls[bData.type] : '');
+
+        html += `<div class="review-move-pair">
+            <span class="review-move-num">${moveNum}.</span>
+            <span class="review-move-cell ${wCls}" onclick="drillFromMove(${wIdx})">${escHtml(wMove.san)}${wData ? ' ' + typeBadge[wData.type] : ''}</span>
+            <span class="review-move-cell ${bMove ? bCls : ''}" ${bMove ? `onclick="drillFromMove(${bIdx})"` : ''}>${bMove ? escHtml(bMove.san) + (bData ? ' ' + typeBadge[bData.type] : '') : ''}</span>`;
+
+        // Annotations below the pair
+        if (wData) {
+            html += `<span class="review-move-annotation">${escHtml(wData.explanation)}</span>`;
+        } else if (bData) {
+            html += `<span class="review-move-annotation">${escHtml(bData.explanation)}</span>`;
+        }
+
+        html += '</div>';
+        i += 2;
+        moveNum++;
+    }
+
+    document.getElementById('reviewResultsContent').innerHTML = html;
+    showReviewStep(3);
+}
+
+function drillFromMove(halfMoveIndex) {
+    // halfMoveIndex is 1-based; reviewFENs[0] = start, reviewFENs[halfMoveIndex] = position after that move
+    const fen = reviewFENs[halfMoveIndex];
+    if (!fen) return;
+
+    closeReviewModal();
+
+    // Set up game at chosen position
+    game = new Chess(fen);
+    board.position(fen);
+    board.orientation(reviewPlayerColor === 'w' ? 'white' : 'black');
+
+    // Enter drill mode (reuse Stockfish free-play machinery)
+    reviewDrillMode = true;
+    freePlayMode    = true;
+    opening         = null;
+    isComplete      = false;
+
+    // Hide trainer UI, show review drill bar
+    document.getElementById('trainerControls').style.display  = 'none';
+    document.getElementById('freePlayBar').style.display      = 'none';
+    document.getElementById('srBar').style.display            = 'none';
+    document.getElementById('statusBox').style.display        = 'none';
+    document.getElementById('progressWrap').style.display     = 'none';
+    document.getElementById('reviewDrillBar').style.display   = 'block';
+
+    const moveNum = Math.ceil(halfMoveIndex / 2);
+    const sideName = reviewPlayerColor === 'w' ? 'White ♙' : 'Black ♟';
+    document.getElementById('reviewDrillStatus').textContent =
+        `Drilling from move ${moveNum} — you play ${sideName}`;
+
+    updateMoveLog();
+    initStockfish();
+
+    // If it's the computer's turn to move first, trigger Stockfish
+    if (game.turn() !== reviewPlayerColor && !game.game_over()) {
+        setTimeout(askStockfish, 600);
+    }
+}
+
+function exitReviewDrill() {
+    reviewDrillMode = false;
+    freePlayMode    = false;
+
+    document.getElementById('reviewDrillBar').style.display  = 'none';
+    document.getElementById('trainerControls').style.display = 'flex';
+    document.getElementById('statusBox').style.display       = 'block';
+
+    if (opening) {
+        updateWeakSpotsIndicator();
+    }
+
+    // Re-open the analysis modal at results step
+    openReviewModal(3);
+}
+
+// Close review modal on overlay click
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'reviewModal') closeReviewModal();
+});
 
 // ═══════════════════════════════════════════════════════════════
 // BOOT
